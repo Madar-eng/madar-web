@@ -102,7 +102,7 @@ function authView(){
   <div class="card"><form id="af">
   ${S.signup?`<label>${t('name')}</label><input id="a_n" autocomplete="name" required>
   <label>${t('phone')}</label><input id="a_p" type="tel" autocomplete="tel" required>`:''}
-  <label>${t('email')}</label><input id="a_e" type="email" autocomplete="email" required>
+  <label>${t('email')}</label><input id="a_e" type="email" autocomplete="email" value="${esc(S.email||'')}" required>
   <label>${t('pass')}</label><input id="a_w" type="password" autocomplete="${S.signup?'new-password':'current-password'}" minlength="6" required>
   ${S.err?`<div class="err">${esc(S.err)}</div>`:''}${S.msg?`<div class="msg">${esc(S.msg)}</div>`:''}
   <button class="btn" style="width:100%" ${S.busy?'disabled':''}>${S.signup?t('signup'):t('signin')}</button></form>
@@ -216,10 +216,11 @@ const A={
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;e.preventDefault();A[el.dataset.act]?.(el.dataset.v,el)});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='af')return;e.preventDefault();
-  S.err='';S.msg='';S.busy=true;render();
   const email=$('#a_e').value.trim(),pw=$('#a_w').value;
+  const nm=S.signup?$('#a_n').value.trim():'',ph=S.signup?$('#a_p').value.trim():'';
+  S.email=email;S.err='';S.msg='';S.busy=true;render();
   let res;
-  if(S.signup)res=await sb.auth.signUp({email,password:pw,options:{data:{full_name:$('#a_n').value.trim(),phone:$('#a_p').value.trim()}}});
+  if(S.signup)res=await sb.auth.signUp({email,password:pw,options:{data:{full_name:nm,phone:ph}}});
   else res=await sb.auth.signInWithPassword({email,password:pw});
   S.busy=false;
   if(res.error){S.err=res.error.message;return render()}
