@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1b4dff">
+<title>Madar Eng | مدار</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🪐%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--fg:#14181f;--mut:#667085;--line:#e3e8ef;--pri:#1b4dff;--onpri:#fff;--ok:#12805c;--warn:#b54708;--bad:#c01048;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b22;--fg:#e6edf3;--mut:#8b98a8;--line:#2a313c;--pri:#5b82ff;--onpri:#0d1117;--ok:#4ade80;--warn:#fbbf24;--bad:#fb7185}}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+main{max-width:720px;margin:0 auto;padding:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+h1{font-size:1.25rem;margin:0}h2{font-size:1.05rem;margin:18px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.btn{appearance:none;border:0;background:var(--pri);color:var(--onpri);border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--pri);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:.9rem}.btn:disabled{opacity:.5}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit;margin:4px 0 10px}
+label{font-size:.9rem;color:var(--mut)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:9px 4px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;font:inherit;cursor:pointer}
+.tabs button.on{background:var(--pri);color:var(--onpri);border-color:var(--pri)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mut{color:var(--mut);font-size:.9rem}
+.chip{font-size:.8rem;padding:2px 10px;border-radius:99px;border:1px solid currentColor}
+.pending{color:var(--warn)}.approved{color:var(--ok)}.rejected{color:var(--bad)}
+.price{font-weight:700;white-space:nowrap}
+.alias{font-size:1.4rem;font-weight:800;direction:ltr;text-align:center;padding:10px;border:2px dashed var(--pri);border-radius:12px;margin:10px 0}
+.vid{position:relative;padding-top:56.25%;background:#000;border-radius:12px;overflow:hidden}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.msg{padding:10px;border-radius:10px;margin:8px 0;background:var(--card);border:1px solid var(--line)}
+.err{color:var(--bad)}.center{text-align:center}
+footer{margin-top:24px;text-align:center}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const sb = supabase.createClient('https://dkuxxestxjmlplhodayi.supabase.co','sb_publishable_V06uZdHHbVbRrRei6jJ9XA_G-c7Eabm');
+const TX = {
+ar:{app:'مدار',tag:'كورسات هندسة',signin:'تسجيل الدخول',signup:'إنشاء حساب',email:'البريد الإلكتروني',pass:'كلمة المرور',name:'الاسم الكامل',phone:'رقم الموبايل',
+ noacc:'ليس لديك حساب؟ أنشئ حساباً',haveacc:'لديك حساب؟ سجّل الدخول',out:'خروج',lessons:'دروسي',buy:'الاشتراك',reqs:'طلباتي',
+ nolessons:'لا توجد دروس مفعّلة لحسابك بعد. اختر من تبويب «الاشتراك».',back:'رجوع',min:'دقيقة',qar:'ريال',
+ monthly:'اشتراك شهري',course:'مادة كاملة',lesson:'درس واحد',pay:'ادفع الآن',alias:'حوّل عبر فوري إلى الاسم:',copy:'نسخ',copied:'تم النسخ',
+ amount:'المبلغ',sender:'الاسم الذي حوّلت به',receipt:'صورة إيصال التحويل',send:'إرسال الإيصال',sent:'تم إرسال طلبك. سيتم التفعيل بعد مراجعة الإيصال.',
+ pending:'قيد المراجعة',approved:'تم التفعيل',rejected:'مرفوض',noreq:'لا توجد طلبات.',reason:'السبب',
+ del:'حذف الحساب',delq:'سيتم حذف حسابك وبياناتك نهائياً. هل أنت متأكد؟',
+ e_generic:'حدث خطأ، حاول مرة أخرى.',e_file:'اختر صورة (JPG أو PNG) أو PDF بحجم أقل من 5 ميجا.',e_need:'أكمل البيانات المطلوبة.',
+ device_limit:'تم الوصول للحد الأقصى من الأجهزة لحسابك. تواصل مع المدرّس لفك الربط.',disabled:'حسابك موقوف. تواصل مع المدرّس.',
+ no_access:'هذا الدرس غير مفعّل لحسابك.',device_not_allowed:'هذا الجهاز غير مسجّل لحسابك. أعد تحميل الصفحة.',loading:'جارٍ التحميل…',
+ wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
+en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create account',email:'Email',pass:'Password',name:'Full name',phone:'Phone number',
+ noacc:'No account? Create one',haveacc:'Have an account? Sign in',out:'Sign out',lessons:'My lessons',buy:'Subscribe',reqs:'My requests',
+ nolessons:'No lessons are enabled for your account yet. Choose from the “Subscribe” tab.',back:'Back',min:'min',qar:'QAR',
+ monthly:'Monthly access',course:'Full course',lesson:'Single lesson',pay:'Pay now',alias:'Transfer via Fawran to the name:',copy:'Copy',copied:'Copied',
+ amount:'Amount',sender:'Name you transferred from',receipt:'Transfer receipt image',send:'Send receipt',sent:'Your request was sent. Access is enabled after the receipt is reviewed.',
+ pending:'Pending review',approved:'Activated',rejected:'Rejected',noreq:'No requests.',reason:'Reason',
+ del:'Delete account',delq:'Your account and data will be permanently deleted. Are you sure?',
+ e_generic:'Something went wrong. Try again.',e_file:'Choose an image (JPG or PNG) or a PDF under 5 MB.',e_need:'Please fill in the required fields.',
+ device_limit:'Your account reached its device limit. Contact your tutor to reset.',disabled:'Your account is disabled. Contact your tutor.',
+ no_access:'This lesson is not enabled for your account.',device_not_allowed:'This device is not registered for your account. Reload the page.',loading:'Loading…',
+ wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
+};
+let lang='ar';try{lang=localStorage.getItem('lang')||'ar'}catch(e){}
+const t=k=>TX[lang][k]||k;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pick=(o,b)=>(lang==='ar'&&o[b+'_ar'])?o[b+'_ar']:(o[b+'_en']||o[b+'_ar']||'');
+const money=n=>Number(n).toLocaleString('en')+' '+t('qar');
+const $=s=>document.querySelector(s);
+const S={user:null,tab:'lessons',bind:'ok',courses:[],lessons:[],offers:[],cfg:{},reqs:[],signup:false,msg:'',err:'',view:null,pay:null,busy:false};
+
+function deviceId(){let id;try{id=localStorage.getItem('did');if(!id){id='web-'+crypto.randomUUID();localStorage.setItem('did',id)}}catch(e){id='web-'+Math.random().toString(36).slice(2)}return id}
+
+async function boot(){
+  if(!S.user){render();return}
+  S.view=null;S.pay=null;
+  const r=await sb.rpc('bind_device',{p_device_id:deviceId(),p_device_name:'Web '+(navigator.platform||'')});
+  S.bind=r.error?'error':r.data;
+  if(S.bind==='ok')await loadAll();
+  render();
+}
+async function loadAll(){
+  const [c,l,o,s,q]=await Promise.all([
+    sb.from('courses').select('id,code,title_en,title_ar,instructor').order('sort_order'),
+    sb.from('lessons').select('id,course_id,title_en,title_ar,duration_seconds').order('sort_order'),
+    sb.from('offers').select('*').eq('is_active',true).order('sort_order'),
+    sb.from('app_settings').select('key,value'),
+    sb.from('payment_requests').select('*').order('created_at',{ascending:false})]);
+  S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.reqs=q.data||[];
+  S.cfg={};(s.data||[]).forEach(x=>S.cfg[x.key]=x.value);
+}
+
+function authView(){
+  return `<div class="center"><h1 style="font-size:2rem">${t('app')}</h1><p class="mut">${t('tag')}</p></div>
+  <div class="card"><form id="af">
+  ${S.signup?`<label>${t('name')}</label><input id="a_n" autocomplete="name" required>
+  <label>${t('phone')}</label><input id="a_p" type="tel" autocomplete="tel" required>`:''}
+  <label>${t('email')}</label><input id="a_e" type="email" autocomplete="email" required>
+  <label>${t('pass')}</label><input id="a_w" type="password" autocomplete="${S.signup?'new-password':'current-password'}" minlength="6" required>
+  ${S.err?`<div class="err">${esc(S.err)}</div>`:''}${S.msg?`<div class="msg">${esc(S.msg)}</div>`:''}
+  <button class="btn" style="width:100%" ${S.busy?'disabled':''}>${S.signup?t('signup'):t('signin')}</button></form>
+  <p class="center"><a href="#" data-act="toggle">${S.signup?t('haveacc'):t('noacc')}</a></p></div>`;
+}
+
+function lessonsView(){
+  if(!S.lessons.length)return `<div class="card mut center">${t('nolessons')}</div>`;
+  return S.courses.map(c=>{
+    const ls=S.lessons.filter(l=>l.course_id===c.id);
+    if(!ls.length)return '';
+    return `<div class="card"><b>${esc(pick(c,'title'))}</b><div class="mut">${esc([c.code,c.instructor].filter(Boolean).join(' • '))}</div>
+    ${ls.map((l,i)=>`<div class="row" style="margin-top:10px"><span>${i+1}. ${esc(pick(l,'title'))}${l.duration_seconds?` <span class="mut">(${Math.round(l.duration_seconds/60)} ${t('min')})</span>`:''}</span>
+    <button class="btn sm" data-act="play" data-v="${l.id}">▶</button></div>`).join('')}</div>`;
+  }).join('');
+}
+
+function buyView(){
+  if(S.pay)return payView();
+  const g=k=>S.offers.filter(o=>o.kind===k);
+  const sec=k=>g(k).length?`<h2>${t(k)}</h2>`+g(k).map(o=>`<div class="card row"><div>${esc(pick(o,'title'))}</div>
+    <div style="text-align:end"><div class="price">${money(o.price_qar)}</div><button class="btn sm" data-act="pay" data-v="${o.id}">${t('pay')}</button></div></div>`).join(''):'';
+  return (sec('monthly')+sec('course')+sec('lesson'))||`<div class="card mut center">${t('none')}</div>`;
+}
+
+function payView(){
+  const o=S.pay;
+  return `<button class="btn ghost sm" data-act="payback">← ${t('back')}</button>
+  <div class="card" style="margin-top:10px"><b>${esc(pick(o,'title'))}</b>
+  <div class="row"><span class="mut">${t('amount')}</span><span class="price">${money(o.price_qar)}</span></div>
+  <p class="mut" style="margin-bottom:0">${t('alias')}</p>
+  <div class="alias">${esc(S.cfg.fawran_alias||'')}</div>
+  <div class="center"><button class="btn ghost sm" data-act="copy">${t('copy')}</button></div>
+  <p class="mut">${esc(S.cfg['instructions_'+lang]||'')}</p>
+  <label>${t('sender')}</label><input id="p_n" required>
+  <label>${t('receipt')}</label><input id="p_f" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+  ${S.err?`<div class="err">${esc(S.err)}</div>`:''}${S.msg?`<div class="msg">${esc(S.msg)}</div>`:''}
+  <button class="btn" style="width:100%" data-act="submitpay" ${S.busy?'disabled':''}>${t('send')}</button></div>`;
+}
+
+function reqsView(){
+  if(!S.reqs.length)return `<div class="card mut center">${t('noreq')}</div>`;
+  return S.reqs.map(r=>`<div class="card"><div class="row"><b>${esc(r.offer_title||'')}</b><span class="chip ${r.status}">${t(r.status)}</span></div>
+  <div class="mut">${money(r.amount_qar)} • ${new Date(r.created_at).toLocaleDateString(lang==='ar'?'ar-QA':'en-GB')}</div>
+  ${r.reject_reason?`<div class="err">${t('reason')}: ${esc(r.reject_reason)}</div>`:''}</div>`).join('');
+}
+
+function playerView(){
+  const v=S.view;
+  return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button>
+  <div style="margin-top:10px">${v.error?`<div class="card err">${esc(t(v.error)===v.error?t('e_generic'):t(v.error))}</div>`
+   :v.loading?`<div class="card center mut">${t('loading')}</div>`
+   :`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div>
+     <p class="mut center">${t('wm')}</p>`}</div>`;
+}
+
+function render(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  const head=`<header><h1>${t('app')}</h1><div><button class="btn ghost sm" data-act="lang">${t('lang')}</button>
+   ${S.user?` <button class="btn ghost sm" data-act="logout">${t('out')}</button>`:''}</div></header>`;
+  let body;
+  if(!S.user)body=authView();
+  else if(S.bind!=='ok')body=`<div class="card err">${esc(t(S.bind)===S.bind?t('e_generic'):t(S.bind))}</div>`;
+  else if(S.view)body=playerView();
+  else{
+    const tabs=[['lessons','lessons'],['buy','buy'],['reqs','reqs']].map(([k,l])=>`<button class="${S.tab===k?'on':''}" data-act="tab" data-v="${k}">${t(l)}</button>`).join('');
+    body=`<div class="tabs">${tabs}</div>`+(S.tab==='lessons'?lessonsView():S.tab==='buy'?buyView():reqsView())
+     +`<footer><button class="btn danger sm" data-act="delete">${t('del')}</button></footer>`;
+  }
+  $('#app').innerHTML=head+body;
+}
+
+const A={
+  lang(){lang=lang==='ar'?'en':'ar';try{localStorage.setItem('lang',lang)}catch(e){}render()},
+  toggle(){S.signup=!S.signup;S.err='';S.msg='';render()},
+  async logout(){await sb.auth.signOut()},
+  tab(v){S.tab=v;S.pay=null;S.err='';S.msg='';render()},
+  async play(id){
+    S.view={loading:true};render();
+    const {data,error}=await sb.functions.invoke('get-otp',{body:{lesson_id:id,device_id:deviceId()}});
+    if(error){let code='e_generic';try{code=(await error.context.json()).error||code}catch(e){}S.view={error:code}}
+    else S.view={otp:data.otp,pi:data.playbackInfo};
+    render();
+  },
+  closeplayer(){S.view=null;render()},
+  pay(id){S.pay=S.offers.find(o=>o.id===id);S.err='';S.msg='';render()},
+  payback(){S.pay=null;S.err='';S.msg='';render()},
+  async copy(v,el){try{await navigator.clipboard.writeText(S.cfg.fawran_alias||'');el.textContent=t('copied')}catch(e){}},
+  async submitpay(){
+    const f=$('#p_f').files[0],n=$('#p_n').value.trim();
+    S.err='';S.msg='';
+    if(!n||!f){S.err=t('e_need');return render()}
+    if(f.size>5*1024*1024||!['image/jpeg','image/png','image/webp','application/pdf'].includes(f.type)){S.err=t('e_file');return render()}
+    S.busy=true;render();
+    const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'jpg';
+    const path=`${S.user.id}/${Date.now()}.${ext}`;
+    const up=await sb.storage.from('receipts').upload(path,f,{contentType:f.type});
+    let ok=!up.error;
+    if(ok){const r=await sb.rpc('create_payment_request',{p_offer_id:S.pay.id,p_sender_name:n,p_receipt_path:path});ok=!r.error}
+    S.busy=false;
+    if(!ok){S.err=t('e_generic');return render()}
+    await loadAll();S.pay=null;S.tab='reqs';S.msg=t('sent');render();
+  },
+  async delete(){
+    if(!confirm(t('delq')))return;
+    const r=await sb.rpc('delete_my_account');
+    if(r.error){alert(t('e_generic'));return}
+    await sb.auth.signOut({scope:'local'});
+  }
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;e.preventDefault();A[el.dataset.act]?.(el.dataset.v,el)});
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='af')return;e.preventDefault();
+  S.err='';S.msg='';S.busy=true;render();
+  const email=$('#a_e').value.trim(),pw=$('#a_w').value;
+  let res;
+  if(S.signup)res=await sb.auth.signUp({email,password:pw,options:{data:{full_name:$('#a_n').value.trim(),phone:$('#a_p').value.trim()}}});
+  else res=await sb.auth.signInWithPassword({email,password:pw});
+  S.busy=false;
+  if(res.error){S.err=res.error.message;return render()}
+  if(S.signup&&!res.data.session){S.msg=t('check');S.signup=false;return render()}
+  render();
+});
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  S.user=session?.user||null;
+  sb.auth.onAuthStateChange((ev,s)=>{const u=s?.user||null;if((u&&u.id)!==(S.user&&S.user.id)){S.user=u;S.tab='lessons';boot()}});
+  boot();
+})();
+</script>
+</body>
+</html>
