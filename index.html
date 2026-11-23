@@ -55,7 +55,7 @@ ar:{app:'مدار',tag:'كورسات هندسة',signin:'تسجيل الدخول
  e_generic:'حدث خطأ، حاول مرة أخرى.',e_file:'اختر صورة (JPG أو PNG) أو PDF بحجم أقل من 5 ميجا.',e_need:'أكمل البيانات المطلوبة.',
  device_limit:'تم الوصول للحد الأقصى من الأجهزة لحسابك. تواصل مع المدرّس لفك الربط.',disabled:'حسابك موقوف. تواصل مع المدرّس.',
  no_access:'هذا الدرس غير مفعّل لحسابك.',device_not_allowed:'هذا الجهاز غير مسجّل لحسابك. أعد تحميل الصفحة.',loading:'جارٍ التحميل…',
- wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
+ wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',code_q:'عندك كود تفعيل؟',code_ph:'اكتب الكود',code_btn:'تفعيل',code_ok:'تم التفعيل. تقدر تشوف دروسك الآن.',code_bad:'الكود غير صحيح أو مستخدم من قبل.',code_many:'محاولات كثيرة. حاول بعد ساعة.',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
 en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create account',email:'Email',pass:'Password',name:'Full name',phone:'Phone number',
  noacc:'No account? Create one',haveacc:'Have an account? Sign in',out:'Sign out',lessons:'My lessons',buy:'Subscribe',reqs:'My requests',
  nolessons:'No lessons are enabled for your account yet. Choose from the “Subscribe” tab.',back:'Back',min:'min',qar:'QAR',
@@ -66,7 +66,7 @@ en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create ac
  e_generic:'Something went wrong. Try again.',e_file:'Choose an image (JPG or PNG) or a PDF under 5 MB.',e_need:'Please fill in the required fields.',
  device_limit:'Your account reached its device limit. Contact your tutor to reset.',disabled:'Your account is disabled. Contact your tutor.',
  no_access:'This lesson is not enabled for your account.',device_not_allowed:'This device is not registered for your account. Reload the page.',loading:'Loading…',
- wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
+ wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',code_q:'Have an activation code?',code_ph:'Enter code',code_btn:'Activate',code_ok:'Activated. You can see your lessons now.',code_bad:'The code is invalid or already used.',code_many:'Too many attempts. Try again in an hour.',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
 };
 let lang='ar';try{lang=localStorage.getItem('lang')||'ar'}catch(e){}
 const t=k=>TX[lang][k]||k;
@@ -127,7 +127,8 @@ function buyView(){
   const g=k=>S.offers.filter(o=>o.kind===k);
   const sec=k=>g(k).length?`<h2>${t(k)}</h2>`+g(k).map(o=>`<div class="card row"><div>${esc(pick(o,'title'))}</div>
     <div style="text-align:end"><div class="price">${money(o.price_qar)}</div><button class="btn sm" data-act="pay" data-v="${o.id}">${t('pay')}</button></div></div>`).join(''):'';
-  return (sec('monthly')+sec('course')+sec('lesson'))||`<div class="card mut center">${t('none')}</div>`;
+  const code=`<div class="card"><b>${t('code_q')}</b><div class="row" style="margin-top:8px"><input id="c_in" placeholder="${t('code_ph')}" dir="ltr" autocapitalize="characters" autocomplete="off" style="margin:0"><button class="btn" data-act="redeem">${t('code_btn')}</button></div></div>`;
+  return code+((sec('monthly')+sec('course')+sec('lesson'))||`<div class="card mut center">${t('none')}</div>`);
 }
 
 function payView(){
@@ -192,6 +193,12 @@ const A={
     render();
   },
   closeplayer(){S.view=null;render()},
+  async redeem(){
+    const v=($('#c_in').value||'').trim();if(!v)return;
+    const r=await sb.rpc('redeem_code',{p_code:v});
+    if(r.error||r.data!=='ok'){alert(r.error?t('e_generic'):r.data==='too_many'?t('code_many'):t('code_bad'));return}
+    await loadAll();S.tab='lessons';render();alert(t('code_ok'));
+  },
   async openfile(path){
     const w=window.open('about:blank','_blank');
     const {data,error}=await sb.storage.from('lesson-files').createSignedUrl(path,300);
