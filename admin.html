@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1533">
+<meta name="robots" content="noindex">
+<title>مدار | لوحة التحكم</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%232447f5' stroke-width='8'/%3E%3Ccircle cx='50' cy='12' r='11' fill='%23ffb300'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f2f5fb;--card:#fff;--ink:#0b1533;--mut:#5b6785;--line:#d8e0ef;--blue:#2447f5;--onblue:#fff;--amber:#ffb300;--ok:#0b8a5d;--bad:#c2255c;--grid:#e3e9f5;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--paper:#0a1124;--card:#111a33;--ink:#e8edfb;--mut:#93a0c0;--line:#243155;--blue:#6f8bff;--onblue:#0a1124;--ok:#3ddc97;--bad:#ff7aa8;--grid:#101a35}}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;font:15px/1.65 "IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+button,input,select{font:inherit;color:inherit}
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+nav{position:sticky;top:0;height:100vh;padding:22px 16px;display:flex;flex-direction:column;gap:6px;background:var(--ink);color:#e8edfb}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.logo{position:relative;width:38px;height:38px;border:3px solid #6f8bff;border-radius:50%;flex:none}
+.logo::after{content:"";position:absolute;top:-7px;inset-inline-start:11px;width:12px;height:12px;border-radius:50%;background:var(--amber)}
+.brand b{display:block;font-size:1.15rem;line-height:1.2}.brand span{font-size:.8rem;opacity:.7}
+nav button.t{display:flex;justify-content:space-between;align-items:center;background:none;border:0;color:inherit;padding:11px 12px;border-radius:10px;cursor:pointer;text-align:start;opacity:.8}
+nav button.t.on{background:rgba(111,139,255,.2);opacity:1;font-weight:700}
+nav .sp{flex:1}
+.cnt{background:var(--amber);color:#1a1200;border-radius:99px;font-size:.8rem;font-weight:700;padding:0 8px;min-width:22px;text-align:center}
+main{padding:26px 24px 60px;max-width:900px;width:100%}
+h2{font-size:1.3rem;margin:0 0 14px}h3{font-size:1.05rem;margin:22px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.mut{color:var(--mut);font-size:.88rem}.big{font-weight:700;font-size:1.1rem}
+.btn{border:0;background:var(--blue);color:var(--onblue);border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ok{background:var(--ok);color:#fff}.btn.bad{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.btn.sm{padding:5px 11px;font-size:.85rem}.btn:disabled{opacity:.5}
+.btn:focus-visible,nav button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{display:inline-block;font-size:.8rem;padding:1px 10px;border-radius:99px;border:1px solid currentColor}
+.pending{color:#b86e00}.approved{color:var(--ok)}.rejected{color:var(--bad)}
+@media (prefers-color-scheme:dark){.pending{color:var(--amber)}}
+.hero{display:flex;align-items:center;gap:22px;margin-bottom:18px}
+.ring{position:relative;width:118px;height:118px;border:3px solid var(--blue);border-radius:50%;display:grid;place-items:center;flex:none}
+.ring b{font-size:2.4rem;line-height:1}
+.orb{position:absolute;inset:-3px;animation:spin 26s linear infinite}
+.orb i{position:absolute;top:-8px;left:50%;margin-inline-start:-8px;width:16px;height:16px;border-radius:50%;background:var(--amber)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips button{padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.chips button.on{background:var(--blue);color:var(--onblue);border-color:var(--blue)}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--card);margin:4px 0 10px}
+label{font-size:.88rem;color:var(--mut)}
+#modal{position:fixed;inset:0;background:rgba(5,10,25,.6);display:none;align-items:flex-end;justify-content:center;z-index:20;padding:0}
+#modal.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px}
+.sheet img{width:100%;max-height:60vh;object-fit:contain;background:#000;border-radius:8px}
+#toast{position:fixed;inset-inline:0;bottom:80px;margin:auto;width:max-content;max-width:90%;background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:99px;display:none;z-index:30}
+.login{max-width:380px;margin:12vh auto;padding:0 16px}.err{color:var(--bad)}
+@media (max-width:760px){
+ .shell{grid-template-columns:1fr}
+ nav{position:fixed;inset:auto 0 0 0;height:auto;flex-direction:row;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:10;justify-content:space-around}
+ nav .brand,nav .sp{display:none}nav button.t{flex:1;justify-content:center;gap:6px;padding:10px 4px}
+ main{padding:18px 14px 90px}.hero{gap:16px}
+ .sheet{border-radius:16px}#modal{align-items:center;padding:12px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div><div id="modal"></div><div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const sb=supabase.createClient('https://dkuxxestxjmlplhodayi.supabase.co','sb_publishable_V06uZdHHbVbRrRei6jJ9XA_G-c7Eabm');
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>Number(n).toLocaleString('en')+' ر.ق';
+const dt=x=>new Date(x).toLocaleString('ar-QA',{dateStyle:'medium',timeStyle:'short'});
+const ok=async p=>{const r=await p;if(r.error)throw r.error;return r.data};
+const S={user:null,admin:null,tab:'pay',filter:'pending',q:'',err:'',busy:false,reqs:[],profs:[],devs:[],courses:[],lessons:[],offers:[]};
+
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
+function openModal(h){$('#modal').innerHTML=`<div class="sheet">${h}</div>`;$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on');$('#modal').innerHTML=''}
+function formModal(title,fields,label,onOk){
+  openModal(`<h3 style="margin-top:0">${title}</h3><form id="mf">${fields.map(f=>`<label>${f.l}</label>`+(f.o
+    ?`<select name="${f.k}">${f.o.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('')}</select>`
+    :`<input name="${f.k}" ${f.t?`type="${f.t}"`:''} ${f.r?'required':''} ${f.d!=null?`value="${esc(f.d)}"`:''}>`)).join('')}
+    <div class="acts"><button class="btn">${label}</button><button type="button" class="btn ghost" data-a="close">إلغاء</button></div></form>`);
+  $('#mf').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;
+    try{await onOk(Object.fromEntries(new FormData(e.target)));closeModal()}catch(x){toast(x.message||'حدث خطأ');b.disabled=false}};
+}
+
+async function boot(){
+  if(!S.user){S.admin=null;return render()}
+  const p=await sb.from('profiles').select('is_admin').eq('id',S.user.id).single();
+  S.admin=!!p.data?.is_admin;
+  if(S.admin)await load();
+  render();
+}
+async function load(){
+  const [r,p,d,c,l,o]=await Promise.all([
+    sb.from('payment_requests').select('*, student:profiles!user_id(full_name,email,phone)').order('created_at',{ascending:false}).limit(150),
+    sb.from('profiles').select('id,full_name,email,phone,max_devices,is_active,is_admin,created_at').order('created_at',{ascending:false}),
+    sb.from('user_devices').select('user_id'),
+    sb.from('courses').select('*').order('sort_order'),
+    sb.from('lessons').select('*').order('sort_order'),
+    sb.from('offers').select('*').order('sort_order')]);
+  S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];
+}
+
+const nm=s=>s?.full_name||s?.email||'بدون اسم';
+const ot=r=>(S.offers.find(o=>o.id===r.offer_id)?.title_ar)||r.offer_title||'';
+function loginView(){
+  return `<div class="login"><div class="brand" style="color:var(--ink)"><div class="logo"></div><div><b>مدار</b><span class="mut">لوحة التحكم</span></div></div>
+  <form id="lf"><label>البريد الإلكتروني</label><input id="l_e" type="email" value="${esc(S.email||'')}" required>
+  <label>كلمة المرور</label><input id="l_w" type="password" required>
+  ${S.err?`<div class="err">${esc(S.err)}</div>`:''}<button class="btn" style="width:100%" ${S.busy?'disabled':''}>دخول</button></form></div>`;
+}
+
+function payView(){
+  const pend=S.reqs.filter(r=>r.status==='pending').length;
+  const list=S.reqs.filter(r=>S.filter==='all'||r.status===S.filter);
+  const F=[['pending','قيد المراجعة'],['approved','تم التفعيل'],['rejected','مرفوضة'],['all','الكل']];
+  return `<div class="hero"><div class="ring"><div class="orb"><i></i></div><b>${pend}</b></div>
+   <div><h2 style="margin:0">طلبات الدفع</h2><div class="mut">${pend?'إيصالات تنتظر مراجعتك':'لا توجد إيصالات معلّقة'}</div></div></div>
+  <div class="chips">${F.map(([k,t])=>`<button class="${S.filter===k?'on':''}" data-a="filter" data-v="${k}">${t}</button>`).join('')}</div>
+  ${list.length?list.map(r=>`<div class="card"><div class="row"><div><div class="big">${esc(nm(r.student))}</div>
+   <div class="mut"><bdi>${esc(r.student?.phone||'')}</bdi> <bdi>${esc(r.student?.email||'')}</bdi></div></div><span class="pill ${r.status}">${{pending:'قيد المراجعة',approved:'تم التفعيل',rejected:'مرفوض'}[r.status]}</span></div>
+   <div style="margin-top:8px"><bdi>${esc(ot(r))}</bdi></div>
+   <div class="row" style="margin-top:4px"><span class="big">${money(r.amount_qar)}</span><span class="mut">${dt(r.created_at)}</span></div>
+   ${r.sender_name?`<div class="mut">حوّل باسم: <bdi>${esc(r.sender_name)}</bdi></div>`:''}
+   ${r.reject_reason?`<div class="err">السبب: ${esc(r.reject_reason)}</div>`:''}
+   <div class="acts"><button class="btn sm" data-a="review" data-v="${r.id}">${r.status==='pending'?'مراجعة الإيصال':'عرض الإيصال'}</button></div></div>`).join(''):`<div class="card mut">لا توجد طلبات هنا.</div>`}`;
+}
+
+function studentsView(){
+  const q=S.q.trim().toLowerCase();
+  const list=S.profs.filter(p=>!q||[p.full_name,p.email,p.phone].join(' ').toLowerCase().includes(q));
+  const dc=id=>S.devs.filter(d=>d.user_id===id).length;
+  return `<h2>الطلاب <span class="mut">(${S.profs.length})</span></h2>
+  <input id="q" placeholder="بحث بالاسم أو الإيميل أو الموبايل" value="${esc(S.q)}">
+  ${list.map(p=>`<div class="card"><div class="row"><div><div class="big">${esc(nm(p))}${p.is_admin?' <span class="pill approved">أدمن</span>':''}</div>
+   <div class="mut"><bdi>${esc(p.phone||'')}</bdi> <bdi>${esc(p.email||'')}</bdi></div></div>
+   <span class="pill ${p.is_active?'approved':'rejected'}">${p.is_active?'نشط':'موقوف'}</span></div>
+   <div class="mut" style="margin-top:6px">الأجهزة: ${dc(p.id)} من ${p.max_devices}</div>
+   <div class="acts"><button class="btn sm" data-a="grant" data-v="${p.id}">منح اشتراك</button>
+   <button class="btn ghost sm" data-a="maxdev" data-v="${p.id}">عدد الأجهزة</button>
+   <button class="btn ghost sm" data-a="resetdev" data-v="${p.id}">مسح الأجهزة</button>
+   <button class="btn bad sm" data-a="active" data-v="${p.id}">${p.is_active?'إيقاف':'تفعيل'}</button></div></div>`).join('')||'<div class="card mut">لا يوجد طلاب.</div>'}`;
+}
+
+function contentView(){
+  return `<div class="row"><h2>المحتوى والأسعار</h2><div class="acts" style="margin:0"><button class="btn sm" data-a="addcourse">مادة جديدة</button><button class="btn sm" data-a="addlesson">درس جديد</button></div></div>
+  ${S.courses.map(c=>{
+    const ls=S.lessons.filter(l=>l.course_id===c.id),os=S.offers.filter(o=>o.course_id===c.id&&o.kind!=='lesson');
+    return `<div class="card"><div class="row"><div><div class="big">${esc(c.title_ar||c.title_en)}</div><div class="mut"><bdi>${esc(c.code||'')}</bdi> <bdi>${esc(c.instructor||'')}</bdi></div></div>
+     <button class="btn ${c.is_published?'ghost':''} sm" data-a="pubcourse" data-v="${c.id}">${c.is_published?'منشورة':'مخفية'}</button></div>
+     ${os.map(o=>`<div class="row" style="margin-top:8px"><span>${esc(o.title_ar)}</span><button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button></div>`).join('')}
+     ${ls.length?'<h3>الدروس</h3>':''}
+     ${ls.map(l=>{const o=S.offers.find(x=>x.lesson_id===l.id);return `<div class="row" style="margin-top:8px;align-items:center"><span>${esc(l.title_ar||l.title_en)}</span><span class="acts" style="margin:0">
+       ${o?`<button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button>`:''}
+       <button class="btn ${l.is_published?'ghost':''} sm" data-a="publesson" data-v="${l.id}">${l.is_published?'منشور':'مخفي'}</button></span></div>`}).join('')}</div>`}).join('')||'<div class="card mut">أضف أول مادة.</div>'}`;
+}
+
+function render(){
+  const app=$('#app');
+  if(!S.user){app.innerHTML=loginView();return}
+  if(S.admin===null){app.innerHTML='<div class="login mut">جارٍ التحميل…</div>';return}
+  if(!S.admin){app.innerHTML=`<div class="login"><p class="err">هذا الحساب ليس أدمن.</p><button class="btn" data-a="logout">خروج</button></div>`;return}
+  const pend=S.reqs.filter(r=>r.status==='pending').length;
+  const T=[['pay','الدفع'],['students','الطلاب'],['content','المحتوى']];
+  app.innerHTML=`<div class="shell"><nav><div class="brand"><div class="logo"></div><div><b>مدار</b><span>لوحة التحكم</span></div></div>
+   ${T.map(([k,t])=>`<button class="t ${S.tab===k?'on':''}" data-a="tab" data-v="${k}">${t}${k==='pay'&&pend?`<span class="cnt">${pend}</span>`:''}</button>`).join('')}
+   <div class="sp"></div><button class="t" data-a="logout">خروج</button></nav>
+   <main>${S.tab==='pay'?payView():S.tab==='students'?studentsView():contentView()}</main></div>`;
+}
+
+const A={
+  close:closeModal,
+  tab(v){S.tab=v;render()},filter(v){S.filter=v;render()},
+  async logout(){await sb.auth.signOut()},
+  async review(id){
+    const r=S.reqs.find(x=>x.id===id);
+    let media='';
+    const u=await sb.storage.from('receipts').createSignedUrl(r.receipt_path,300);
+    if(u.data){media=/\.pdf$/i.test(r.receipt_path)?`<a class="btn" href="${u.data.signedUrl}" target="_blank" rel="noopener">فتح ملف PDF</a>`:`<a href="${u.data.signedUrl}" target="_blank" rel="noopener"><img src="${u.data.signedUrl}" alt="إيصال التحويل"></a>`}
+    else media='<div class="err">تعذّر تحميل الإيصال.</div>';
+    openModal(`<div class="big">${esc(nm(r.student))}</div><div class="mut"><bdi>${esc(r.student?.phone||'')}</bdi></div>
+     <div style="margin:8px 0"><bdi>${esc(ot(r))}</bdi>: <b>${money(r.amount_qar)}</b></div>${r.sender_name?`<div class="mut">حوّل باسم: <bdi>${esc(r.sender_name)}</bdi></div>`:''}
+     <div style="margin:12px 0">${media}</div>
+     <div class="acts">${r.status==='pending'?`<button class="btn ok" data-a="approve" data-v="${r.id}">تأكيد وتفعيل</button><button class="btn bad" data-a="reject" data-v="${r.id}">رفض</button>`:''}<button class="btn ghost" data-a="close">إغلاق</button></div>`);
+  },
+  async approve(id){
+    if(!confirm('تأكيد الدفع وتفعيل الاشتراك للطالب؟'))return;
+    try{await ok(sb.rpc('approve_payment',{p_request_id:id}));closeModal();await load();render();toast('تم التفعيل')}catch(e){toast(e.message)}
+  },
+  async reject(id){
+    const why=prompt('سبب الرفض (يظهر للطالب):');if(why===null)return;
+    try{await ok(sb.rpc('reject_payment',{p_request_id:id,p_reason:why}));closeModal();await load();render();toast('تم الرفض')}catch(e){toast(e.message)}
+  },
+  grant(uid){
+    const p=S.profs.find(x=>x.id===uid);
+    formModal(`منح اشتراك: ${esc(nm(p))}`,[{k:'offer',l:'العرض',o:S.offers.map(o=>[o.id,`${o.title_ar} (${money(o.price_qar)})`])}],'منح',async v=>{
+      const o=S.offers.find(x=>x.id===v.offer);
+      const exp=o.duration_days?new Date(Date.now()+o.duration_days*864e5).toISOString():null;
+      if(o.kind==='lesson')await ok(sb.from('lesson_access').upsert({user_id:uid,lesson_id:o.lesson_id,expires_at:exp},{onConflict:'user_id,lesson_id'}));
+      else await ok(sb.from('course_access').upsert({user_id:uid,course_id:o.course_id,expires_at:exp},{onConflict:'user_id,course_id'}));
+      toast('تم المنح');
+    });
+  },
+  async maxdev(uid){
+    const p=S.profs.find(x=>x.id===uid);const v=prompt('عدد الأجهزة المسموح:',p.max_devices);if(v===null)return;
+    try{await ok(sb.rpc('admin_update_profile',{p_user_id:uid,p_max_devices:parseInt(v,10)}));await load();render();toast('تم الحفظ')}catch(e){toast(e.message)}
+  },
+  async resetdev(uid){
+    if(!confirm('مسح كل أجهزة الطالب؟ سيسجّل من جهازه من جديد.'))return;
+    try{await ok(sb.from('user_devices').delete().eq('user_id',uid));await load();render();toast('تم المسح')}catch(e){toast(e.message)}
+  },
+  async active(uid){
+    const p=S.profs.find(x=>x.id===uid);
+    try{await ok(sb.rpc('admin_update_profile',{p_user_id:uid,p_is_active:!p.is_active}));await load();render()}catch(e){toast(e.message)}
+  },
+  async price(id){
+    const o=S.offers.find(x=>x.id===id);const v=prompt('السعر بالريال القطري:',o.price_qar);if(v===null)return;
+    const n=parseFloat(v);if(!(n>0))return toast('أدخل رقماً أكبر من صفر');
+    try{await ok(sb.from('offers').update({price_qar:n}).eq('id',id));await load();render();toast('تم تحديث السعر')}catch(e){toast(e.message)}
+  },
+  async pubcourse(id){const c=S.courses.find(x=>x.id===id);try{await ok(sb.from('courses').update({is_published:!c.is_published}).eq('id',id));await load();render()}catch(e){toast(e.message)}},
+  async publesson(id){const l=S.lessons.find(x=>x.id===id);try{await ok(sb.from('lessons').update({is_published:!l.is_published}).eq('id',id));await load();render()}catch(e){toast(e.message)}},
+  addcourse(){
+    formModal('مادة جديدة',[{k:'code',l:'الكود (مثل AECH 2142)'},{k:'title_ar',l:'الاسم بالعربي',r:1},{k:'title_en',l:'الاسم بالإنجليزي',r:1},{k:'instructor',l:'الدكتور (اختياري)'}],'إضافة',async v=>{
+      await ok(sb.from('courses').insert({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,is_published:false,sort_order:S.courses.length+1}));
+      await load();render();toast('تمت الإضافة، انشرها عند الجاهزية');
+    });
+  },
+  addlesson(){
+    if(!S.courses.length)return toast('أضف مادة أولاً');
+    formModal('درس جديد',[{k:'course',l:'المادة',o:S.courses.map(c=>[c.id,c.title_ar||c.title_en])},{k:'title_ar',l:'العنوان بالعربي',r:1},{k:'title_en',l:'العنوان بالإنجليزي',r:1},
+     {k:'vid',l:'كود الفيديو من VdoCipher',r:1},{k:'secs',l:'المدة بالثواني (اختياري)',t:'number'},{k:'pub',l:'النشر',o:[['1','منشور'],['0','مخفي']]}],'إضافة',async v=>{
+      const n=S.lessons.filter(l=>l.course_id===v.course).length+1;
+      await ok(sb.from('lessons').insert({course_id:v.course,title_ar:v.title_ar,title_en:v.title_en,vdocipher_video_id:v.vid.trim(),duration_seconds:v.secs?parseInt(v.secs,10):null,is_published:v.pub==='1',sort_order:n}));
+      await load();render();toast('تمت إضافة الدرس بسعره الافتراضي');
+    });
+  }
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el){e.preventDefault();A[el.dataset.a]?.(el.dataset.v)}else if(e.target.id==='modal')closeModal()});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;const pos=e.target.selectionStart;render();const q=$('#q');q.focus();q.setSelectionRange(pos,pos)}});
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='lf')return;e.preventDefault();
+  const email=$('#l_e').value.trim(),pw=$('#l_w').value;
+  S.email=email;S.err='';S.busy=true;render();
+  const r=await sb.auth.signInWithPassword({email,password:pw});
+  S.busy=false;if(r.error){S.err=r.error.message;render()}
+});
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();S.user=session?.user||null;
+  sb.auth.onAuthStateChange((ev,s)=>{const u=s?.user||null;if((u&&u.id)!==(S.user&&S.user.id)){S.user=u;S.admin=null;boot()}});
+  boot();
+})();
+</script>
+</body>
+</html>
