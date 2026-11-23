@@ -55,7 +55,7 @@ ar:{app:'مدار',tag:'كورسات هندسة',signin:'تسجيل الدخول
  e_generic:'حدث خطأ، حاول مرة أخرى.',e_file:'اختر صورة (JPG أو PNG) أو PDF بحجم أقل من 5 ميجا.',e_need:'أكمل البيانات المطلوبة.',
  device_limit:'تم الوصول للحد الأقصى من الأجهزة لحسابك. تواصل مع المدرّس لفك الربط.',disabled:'حسابك موقوف. تواصل مع المدرّس.',
  no_access:'هذا الدرس غير مفعّل لحسابك.',device_not_allowed:'هذا الجهاز غير مسجّل لحسابك. أعد تحميل الصفحة.',loading:'جارٍ التحميل…',
- wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
+ wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
 en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create account',email:'Email',pass:'Password',name:'Full name',phone:'Phone number',
  noacc:'No account? Create one',haveacc:'Have an account? Sign in',out:'Sign out',lessons:'My lessons',buy:'Subscribe',reqs:'My requests',
  nolessons:'No lessons are enabled for your account yet. Choose from the “Subscribe” tab.',back:'Back',min:'min',qar:'QAR',
@@ -66,7 +66,7 @@ en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create ac
  e_generic:'Something went wrong. Try again.',e_file:'Choose an image (JPG or PNG) or a PDF under 5 MB.',e_need:'Please fill in the required fields.',
  device_limit:'Your account reached its device limit. Contact your tutor to reset.',disabled:'Your account is disabled. Contact your tutor.',
  no_access:'This lesson is not enabled for your account.',device_not_allowed:'This device is not registered for your account. Reload the page.',loading:'Loading…',
- wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
+ wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
 };
 let lang='ar';try{lang=localStorage.getItem('lang')||'ar'}catch(e){}
 const t=k=>TX[lang][k]||k;
@@ -74,7 +74,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const pick=(o,b)=>(lang==='ar'&&o[b+'_ar'])?o[b+'_ar']:(o[b+'_en']||o[b+'_ar']||'');
 const money=n=>Number(n).toLocaleString('en')+' '+t('qar');
 const $=s=>document.querySelector(s);
-const S={user:null,tab:'lessons',bind:'ok',courses:[],lessons:[],offers:[],cfg:{},reqs:[],signup:false,msg:'',err:'',view:null,pay:null,busy:false};
+const S={user:null,tab:'lessons',bind:'ok',courses:[],lessons:[],files:[],offers:[],cfg:{},reqs:[],signup:false,msg:'',err:'',view:null,pay:null,busy:false};
 
 function deviceId(){let id;try{id=localStorage.getItem('did');if(!id){id='web-'+crypto.randomUUID();localStorage.setItem('did',id)}}catch(e){id='web-'+Math.random().toString(36).slice(2)}return id}
 
@@ -87,13 +87,14 @@ async function boot(){
   render();
 }
 async function loadAll(){
-  const [c,l,o,s,q]=await Promise.all([
+  const [c,l,o,s,q,fl]=await Promise.all([
     sb.from('courses').select('id,code,title_en,title_ar,instructor').order('sort_order'),
     sb.from('lessons').select('id,course_id,title_en,title_ar,duration_seconds').order('sort_order'),
     sb.from('offers').select('*').eq('is_active',true).order('sort_order'),
     sb.from('app_settings').select('key,value'),
-    sb.from('payment_requests').select('*').order('created_at',{ascending:false})]);
-  S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.reqs=q.data||[];
+    sb.from('payment_requests').select('*').order('created_at',{ascending:false}),
+    sb.from('lesson_files').select('id,lesson_id,kind,title_ar,title_en,storage_path').order('sort_order')]);
+  S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.reqs=q.data||[];S.files=fl.data||[];
   S.cfg={};(s.data||[]).forEach(x=>S.cfg[x.key]=x.value);
 }
 
@@ -116,7 +117,8 @@ function lessonsView(){
     if(!ls.length)return '';
     return `<div class="card"><b>${esc(pick(c,'title'))}</b><div class="mut">${esc([c.code,c.instructor].filter(Boolean).join(' • '))}</div>
     ${ls.map((l,i)=>`<div class="row" style="margin-top:10px"><span>${i+1}. ${esc(pick(l,'title'))}${l.duration_seconds?` <span class="mut">(${Math.round(l.duration_seconds/60)} ${t('min')})</span>`:''}</span>
-    <button class="btn sm" data-act="play" data-v="${l.id}">▶</button></div>`).join('')}</div>`;
+    <button class="btn sm" data-act="play" data-v="${l.id}">▶</button></div>
+    ${S.files.filter(f=>f.lesson_id===l.id).map(f=>`<div class="row" style="margin-top:4px;padding-inline-start:16px"><span class="mut">${t('k_'+f.kind)}: ${esc(pick(f,'title'))}</span><button class="btn ghost sm" data-act="openfile" data-v="${esc(f.storage_path)}">${t('open')}</button></div>`).join('')}`).join('')}</div>`;
   }).join('');
 }
 
@@ -190,6 +192,12 @@ const A={
     render();
   },
   closeplayer(){S.view=null;render()},
+  async openfile(path){
+    const w=window.open('about:blank','_blank');
+    const {data,error}=await sb.storage.from('lesson-files').createSignedUrl(path,300);
+    if(error||!data){if(w)w.close();alert(t('e_generic'));return}
+    if(w)w.location.href=data.signedUrl;else location.href=data.signedUrl;
+  },
   pay(id){S.pay=S.offers.find(o=>o.id===id);S.err='';S.msg='';render()},
   payback(){S.pay=null;S.err='';S.msg='';render()},
   async copy(v,el){try{await navigator.clipboard.writeText(S.cfg.fawran_alias||'');el.textContent=t('copied')}catch(e){}},

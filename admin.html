@@ -11,13 +11,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--paper:#f2f5fb;--card:#fff;--ink:#0b1533;--mut:#5b6785;--line:#d8e0ef;--blue:#2447f5;--onblue:#fff;--amber:#ffb300;--ok:#0b8a5d;--bad:#c2255c;--grid:#e3e9f5;color-scheme:light dark}
-@media (prefers-color-scheme:dark){:root{--paper:#0a1124;--card:#111a33;--ink:#e8edfb;--mut:#93a0c0;--line:#243155;--blue:#6f8bff;--onblue:#0a1124;--ok:#3ddc97;--bad:#ff7aa8;--grid:#101a35}}
+:root{--paper:#f2f5fb;--card:#fff;--ink:#0b1533;--mut:#5b6785;--line:#d8e0ef;--blue:#2447f5;--onblue:#fff;--amber:#ffb300;--ok:#0b8a5d;--bad:#c2255c;--grid:#e3e9f5;--nav:#0b1533;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--paper:#0a1124;--card:#111a33;--ink:#e8edfb;--mut:#93a0c0;--line:#243155;--blue:#6f8bff;--onblue:#0a1124;--ok:#3ddc97;--bad:#ff7aa8;--grid:#101a35;--nav:#050b1c}}
 *{box-sizing:border-box}
 body{margin:0;color:var(--ink);background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;font:15px/1.65 "IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
 button,input,select{font:inherit;color:inherit}
 .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
-nav{position:sticky;top:0;height:100vh;padding:22px 16px;display:flex;flex-direction:column;gap:6px;background:var(--ink);color:#e8edfb}
+nav{position:sticky;top:0;height:100vh;padding:22px 16px;display:flex;flex-direction:column;gap:6px;background:var(--nav);color:#e8edfb}
 .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
 .logo{position:relative;width:38px;height:38px;border:3px solid #6f8bff;border-radius:50%;flex:none}
 .logo::after{content:"";position:absolute;top:-7px;inset-inline-start:11px;width:12px;height:12px;border-radius:50%;background:var(--amber)}
@@ -85,7 +85,7 @@ function closeModal(){$('#modal').classList.remove('on');$('#modal').innerHTML='
 function formModal(title,fields,label,onOk){
   openModal(`<h3 style="margin-top:0">${title}</h3><form id="mf">${fields.map(f=>`<label>${f.l}</label>`+(f.o
     ?`<select name="${f.k}">${f.o.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('')}</select>`
-    :`<input name="${f.k}" ${f.t?`type="${f.t}"`:''} ${f.r?'required':''} ${f.d!=null?`value="${esc(f.d)}"`:''}>`)).join('')}
+    :`<input name="${f.k}" ${f.t?`type="${f.t}"`:''} ${f.r?'required':''} ${f.d!=null?`value="${esc(f.d)}"`:''} ${f.a?`accept="${f.a}"`:''}>`)).join('')}
     <div class="acts"><button class="btn">${label}</button><button type="button" class="btn ghost" data-a="close">إلغاء</button></div></form>`);
   $('#mf').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;
     try{await onOk(Object.fromEntries(new FormData(e.target)));closeModal()}catch(x){toast(x.message||'حدث خطأ');b.disabled=false}};
@@ -109,6 +109,7 @@ async function load(){
   S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];
 }
 
+const KIND={pdf:'ملف PDF',exam:'امتحان',summary:'ملخص (NotebookLM)',audio:'ملف صوتي',image:'صورة',other:'آخر'};
 const nm=s=>s?.full_name||s?.email||'بدون اسم';
 const ot=r=>(S.offers.find(o=>o.id===r.offer_id)?.title_ar)||r.offer_title||'';
 function loginView(){
@@ -160,6 +161,7 @@ function contentView(){
      ${ls.length?'<h3>الدروس</h3>':''}
      ${ls.map(l=>{const o=S.offers.find(x=>x.lesson_id===l.id);return `<div class="row" style="margin-top:8px;align-items:center"><span>${esc(l.title_ar||l.title_en)}</span><span class="acts" style="margin:0">
        ${o?`<button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button>`:''}
+       <button class="btn ghost sm" data-a="files" data-v="${l.id}">الملفات</button>
        <button class="btn ${l.is_published?'ghost':''} sm" data-a="publesson" data-v="${l.id}">${l.is_published?'منشور':'مخفي'}</button></span></div>`}).join('')}</div>`}).join('')||'<div class="card mut">أضف أول مادة.</div>'}`;
 }
 
@@ -228,6 +230,32 @@ const A={
   },
   async pubcourse(id){const c=S.courses.find(x=>x.id===id);try{await ok(sb.from('courses').update({is_published:!c.is_published}).eq('id',id));await load();render()}catch(e){toast(e.message)}},
   async publesson(id){const l=S.lessons.find(x=>x.id===id);try{await ok(sb.from('lessons').update({is_published:!l.is_published}).eq('id',id));await load();render()}catch(e){toast(e.message)}},
+  async files(lid){
+    const l=S.lessons.find(x=>x.id===lid);
+    let fs=[];try{fs=await ok(sb.from('lesson_files').select('*').eq('lesson_id',lid).order('sort_order'))}catch(e){return toast('شغّل ملف madar_files.sql أولاً')}
+    openModal(`<h3 style="margin-top:0">ملفات الدرس: ${esc(l.title_ar||l.title_en)}</h3>
+     <div class="mut" style="margin-bottom:10px">الفيديو الأساسي بيتضاف من «درس جديد». هنا الملفات الإضافية.</div>
+     ${fs.length?fs.map(f=>`<div class="row" style="align-items:center;margin-bottom:8px"><span><span class="pill approved">${KIND[f.kind]}</span> <bdi>${esc(f.title_ar)}</bdi></span><button class="btn bad sm" data-a="delfile" data-v="${f.id}|${lid}">حذف</button></div>`).join(''):'<div class="mut">لا توجد ملفات بعد.</div>'}
+     <div class="acts"><button class="btn" data-a="addfile" data-v="${lid}">إضافة ملف</button><button class="btn ghost" data-a="close">إغلاق</button></div>`);
+  },
+  addfile(lid){
+    formModal('إضافة ملف للدرس',[{k:'kind',l:'النوع',o:Object.entries(KIND)},{k:'title_ar',l:'العنوان بالعربي',r:1},{k:'title_en',l:'العنوان بالإنجليزي (اختياري)'},
+     {k:'file',l:'الملف (حتى 50 ميجا)',t:'file',r:1,a:'application/pdf,image/*,audio/*'}],'رفع',async v=>{
+      const f=v.file;if(!f||!f.size)throw new Error('اختر ملفاً');if(f.size>50*1024*1024)throw new Error('الملف أكبر من 50 ميجا');
+      const ext=(f.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';
+      const path=`${lid}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+      await ok(sb.storage.from('lesson-files').upload(path,f,{contentType:f.type}));
+      try{await ok(sb.from('lesson_files').insert({lesson_id:lid,kind:v.kind,title_ar:v.title_ar,title_en:v.title_en||null,storage_path:path,mime:f.type,is_published:true}))}
+      catch(e){await sb.storage.from('lesson-files').remove([path]);throw e}
+      toast('تم رفع الملف');setTimeout(()=>A.files(lid),60);
+    });
+  },
+  async delfile(v){
+    const [id,lid]=v.split('|');if(!confirm('حذف الملف نهائياً؟'))return;
+    try{const f=await ok(sb.from('lesson_files').select('storage_path').eq('id',id).single());
+      await sb.storage.from('lesson-files').remove([f.storage_path]);
+      await ok(sb.from('lesson_files').delete().eq('id',id));A.files(lid)}catch(e){toast(e.message)}
+  },
   addcourse(){
     formModal('مادة جديدة',[{k:'code',l:'الكود (مثل AECH 2142)'},{k:'title_ar',l:'الاسم بالعربي',r:1},{k:'title_en',l:'الاسم بالإنجليزي',r:1},{k:'instructor',l:'الدكتور (اختياري)'}],'إضافة',async v=>{
       await ok(sb.from('courses').insert({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,is_published:false,sort_order:S.courses.length+1}));
