@@ -37,7 +37,7 @@ label{font-size:.9rem;color:var(--mut)}
 .msg{padding:10px;border-radius:10px;margin:8px 0;background:var(--card);border:1px solid var(--line)}
 .err{color:var(--bad)}.center{text-align:center}
 footer{margin-top:24px;text-align:center}
-.pdfbox{position:relative;background:#525659;border-radius:10px;padding:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.pdfbox canvas{display:block;width:100%;margin:0 auto 8px;background:#fff}.wmlay{position:absolute;inset:0;pointer-events:none}.ytwm{position:absolute;pointer-events:none;font-weight:700;font-size:15px;direction:ltr;transition:top 1.2s,left 1.2s;text-shadow:0 0 2px rgba(0,0,0,.35)}
+.pdfbox{position:relative;background:#525659;border-radius:10px;padding:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.pdfbox canvas{display:block;width:100%;margin:0 auto 8px;background:#fff}.wmlay{position:absolute;inset:0;pointer-events:none}.ctl{display:flex;align-items:center;gap:6px;margin-top:8px;direction:ltr}.ctl .btn{padding:6px 10px}.ytwm{position:absolute;pointer-events:none;font-weight:700;font-size:15px;direction:ltr;transition:top 1.2s,left 1.2s;text-shadow:0 0 2px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
@@ -161,14 +161,26 @@ function playerView(){
   const v=S.view;let inner;
   if(v.error)inner=`<div class="card err">${esc(t(v.error)===v.error?t('e_generic'):t(v.error))}${v.det?`<div class="mut" dir="ltr" style="font-size:.75rem;margin-top:6px;word-break:break-all">${esc(v.det)}</div>`:''}</div>`;
   else if(v.loading)inner=`<div class="card center mut">${t('loading')}</div>`;
-  else if(v.yt)inner=`<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.yt)}?rel=0&modestbranding=1&playsinline=1&fs=0" allow="encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    <div id="wm" class="ytwm" style="top:12%;left:8%;color:${esc(wmCol())};opacity:${wmAlpha()}">${esc(S.wm||'')}</div></div><p class="mut center">${t('wm')}</p>`;
+  else if(v.yt)inner=`<div class="vid"><div id="ytp"></div><div id="wm" class="ytwm" style="top:12%;left:8%;color:${esc(wmCol())};opacity:${wmAlpha()}">${esc(S.wm||'')}</div></div>
+    <div class="ctl"><button class="btn sm" id="ytb" data-act="ytplay">▶</button><button class="btn ghost sm" data-act="ytback">−10</button><button class="btn ghost sm" data-act="ytfwd">+10</button>
+    <input id="yts" type="range" min="0" max="1000" value="0" style="margin:0;flex:1"><span id="ytt" class="mut" style="font-size:.8rem">0:00</span>
+    <button class="btn ghost sm" id="ytr" data-act="ytspeed">1x</button><button class="btn ghost sm" id="ytm" data-act="ytmute">🔊</button></div><p class="mut center">${t('wm')}</p>`;
   else if(v.pdf)inner=`<div id="pdfbox" class="pdfbox"><div class="center" style="color:#fff;padding:24px">${t('loading')}</div></div><p class="mut center">${t('wm')}</p>`;
   else inner=`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div><p class="mut center">${t('wm')}</p>`;
   return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button><div style="margin-top:10px">${inner}</div>`;
 }
-let wmT;
+let wmT,ytP=null,ytTimer,ytDrag=false;
 function startWm(){clearInterval(wmT);wmT=setInterval(()=>{const e=$('#wm');if(!e){clearInterval(wmT);return}e.style.top=(6+Math.random()*78)+'%';e.style.left=(4+Math.random()*58)+'%'},4500)}
+const fmt=s=>{s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function loadYT(){return new Promise(res=>{if(window.YT&&YT.Player)return res();window.onYouTubeIframeAPIReady=res;const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})}
+async function startYt(id){
+  await loadYT();if(!$('#ytp'))return;
+  ytP=new YT.Player('ytp',{videoId:id,playerVars:{controls:0,disablekb:1,fs:0,rel:0,modestbranding:1,playsinline:1,iv_load_policy:3,cc_load_policy:0,origin:location.origin},
+    events:{onStateChange:e=>{const b=$('#ytb');if(b)b.textContent=e.data===1?'⏸':'▶'}}});
+  clearInterval(ytTimer);
+  ytTimer=setInterval(()=>{const s=$('#yts');if(!ytP||!ytP.getCurrentTime||!s){return}const d=ytP.getDuration()||0,c=ytP.getCurrentTime()||0;
+    if(!ytDrag)s.value=d?Math.round(c/d*1000):0;$('#ytt').textContent=fmt(c)+' / '+fmt(d)},500);
+}
 function wmTile(){
   const x=s=>String(s).replace(/[&<>"']/g,'');
   const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='14' y='100' transform='rotate(-24 140 85)' fill='${wmCol()}' fill-opacity='${wmAlpha()}' font-size='17' font-weight='700' font-family='sans-serif'>${x(S.wm||'')}</text></svg>`;
@@ -204,7 +216,7 @@ function render(){
      +`<footer><button class="btn danger sm" data-act="delete">${t('del')}</button></footer>`;
   }
   $('#app').innerHTML=head+body;
-  if(S.view&&S.view.yt)startWm();
+  if(S.view&&S.view.yt){startWm();startYt(S.view.yt)}
   if(S.view&&S.view.pdfData)drawPdf();
 }
 
@@ -224,7 +236,12 @@ const A={
     else S.view={otp:data.otp,pi:data.playbackInfo};
     render();
   },
-  closeplayer(){S.view=null;render()},
+  closeplayer(){if(ytP&&ytP.destroy){try{ytP.destroy()}catch(e){}}ytP=null;clearInterval(ytTimer);S.view=null;render()},
+  ytplay(){if(!ytP)return;ytP.getPlayerState()===1?ytP.pauseVideo():ytP.playVideo()},
+  ytback(){if(ytP)ytP.seekTo(Math.max(0,ytP.getCurrentTime()-10),true)},
+  ytfwd(){if(ytP)ytP.seekTo(ytP.getCurrentTime()+10,true)},
+  ytspeed(){if(!ytP)return;const r=[1,1.25,1.5,2,0.75],n=r[(r.indexOf(ytP.getPlaybackRate())+1)%r.length];ytP.setPlaybackRate(n);$('#ytr').textContent=n+'x'},
+  ytmute(){if(!ytP)return;if(ytP.isMuted()){ytP.unMute();$('#ytm').textContent='🔊'}else{ytP.mute();$('#ytm').textContent='🔇'}},
   async redeem(){
     const v=($('#c_in').value||'').trim();if(!v)return;
     const r=await sb.rpc('redeem_code',{p_code:v});
@@ -267,6 +284,8 @@ const A={
   }
 };
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;e.preventDefault();A[el.dataset.act]?.(el.dataset.v,el)});
+document.addEventListener('pointerdown',e=>{if(e.target.id==='yts')ytDrag=true});
+document.addEventListener('change',e=>{if(e.target.id==='yts'){ytDrag=false;if(ytP&&ytP.getDuration)ytP.seekTo(ytP.getDuration()*e.target.value/1000,true)}});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='af')return;e.preventDefault();
   const email=$('#a_e').value.trim(),pw=$('#a_w').value;

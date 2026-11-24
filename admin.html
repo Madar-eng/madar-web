@@ -83,11 +83,11 @@ const S={user:null,admin:null,tab:'home',stats:null,codes:[],cfg:{},filter:'pend
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
 function openModal(h){$('#modal').innerHTML=`<div class="sheet">${h}</div>`;$('#modal').classList.add('on')}
 function closeModal(){$('#modal').classList.remove('on');$('#modal').innerHTML=''}
-function formModal(title,fields,label,onOk){
+function formModal(title,fields,label,onOk,extra=''){
   openModal(`<h3 style="margin-top:0">${title}</h3><form id="mf">${fields.map(f=>`<label>${f.l}</label>`+(f.o
     ?`<select name="${f.k}">${f.o.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('')}</select>`
     :`<input name="${f.k}" ${f.t?`type="${f.t}"`:''} ${f.r?'required':''} ${f.d!=null?`value="${esc(f.d)}"`:''} ${f.a?`accept="${f.a}"`:''}>`)).join('')}
-    <div class="acts"><button class="btn">${label}</button><button type="button" class="btn ghost" data-a="close">إلغاء</button></div></form>`);
+    <div class="acts"><button class="btn">${label}</button><button type="button" class="btn ghost" data-a="close">إلغاء</button>${extra}</div></form>`);
   $('#mf').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;
     try{await onOk(Object.fromEntries(new FormData(e.target)));closeModal()}catch(x){toast(x.message||'حدث خطأ');b.disabled=false}};
 }
@@ -113,6 +113,10 @@ async function load(){
   S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.stats=st.data||null;S.codes=cd.data||[];S.cfg={};(cf.data||[]).forEach(x=>S.cfg[x.key]=x.value);
 }
 
+async function rmLessonFiles(lid){
+  const r=await sb.from('lesson_files').select('storage_path').eq('lesson_id',lid);
+  const p=(r.data||[]).map(x=>x.storage_path);if(p.length)await sb.storage.from('lesson-files').remove(p);
+}
 const KIND={pdf:'ملف PDF',exam:'امتحان',summary:'ملخص (NotebookLM)',audio:'ملف صوتي',image:'صورة',other:'آخر'};
 const ytId=s=>{const m=String(s).match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(String(s).trim())?String(s).trim():null)};
 const videoFields=v=>{if(v.src==='youtube'){const id=ytId(v.vid);if(!id)throw new Error('رابط يوتيوب غير صحيح');return{video_source:'youtube',youtube_id:id,vdocipher_video_id:null}}return{video_source:'vdocipher',youtube_id:null,vdocipher_video_id:v.vid.trim()}};
@@ -166,11 +170,12 @@ function contentView(){
   ${S.courses.map(c=>{
     const ls=S.lessons.filter(l=>l.course_id===c.id),os=S.offers.filter(o=>o.course_id===c.id&&o.kind!=='lesson');
     return `<div class="card"><div class="row"><div><div class="big">${esc(c.title_ar||c.title_en)}</div><div class="mut"><bdi>${esc(c.code||'')}</bdi> <bdi>${esc(c.instructor||'')}</bdi></div></div>
-     <button class="btn ${c.is_published?'ghost':''} sm" data-a="pubcourse" data-v="${c.id}">${c.is_published?'منشورة':'مخفية'}</button></div>
+     <span class="acts" style="margin:0"><button class="btn ghost sm" data-a="editcourse" data-v="${c.id}">تعديل</button><button class="btn ${c.is_published?'ghost':''} sm" data-a="pubcourse" data-v="${c.id}">${c.is_published?'منشورة':'مخفية'}</button></span></div>
      ${os.map(o=>`<div class="row" style="margin-top:8px"><span>${esc(o.title_ar)}</span><button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button></div>`).join('')}
      ${ls.length?'<h3>الدروس</h3>':''}
      ${ls.map(l=>{const o=S.offers.find(x=>x.lesson_id===l.id);return `<div class="row" style="margin-top:8px;align-items:center"><span>${esc(l.title_ar||l.title_en)}</span><span class="acts" style="margin:0">
        ${o?`<button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button>`:''}
+       <button class="btn ghost sm" data-a="editlesson" data-v="${l.id}">تعديل</button>
        <button class="btn ghost sm" data-a="editvideo" data-v="${l.id}">الفيديو</button>
        <button class="btn ghost sm" data-a="files" data-v="${l.id}">الملفات</button>
        <button class="btn ${l.is_published?'ghost':''} sm" data-a="publesson" data-v="${l.id}">${l.is_published?'منشور':'مخفي'}</button></span></div>`}).join('')}</div>`}).join('')||'<div class="card mut">أضف أول مادة.</div>'}`;
@@ -317,6 +322,36 @@ const A={
     formModal('فيديو الدرس',[{k:'src',l:'مصدر الفيديو',o:SRC},{k:'vid',l:'كود VdoCipher أو رابط يوتيوب',r:1,d:(l.video_source==='youtube'?l.youtube_id:l.vdocipher_video_id)||''}],'حفظ',async v=>{
       await ok(sb.from('lessons').update(videoFields(v)).eq('id',id));await load();render();toast('تم التحديث');
     });
+  },
+  editcourse(id){
+    const c=S.courses.find(x=>x.id===id);
+    formModal('تعديل المادة',[{k:'code',l:'الكود',d:c.code||''},{k:'title_ar',l:'الاسم بالعربي',r:1,d:c.title_ar||''},{k:'title_en',l:'الاسم بالإنجليزي',r:1,d:c.title_en||''},
+     {k:'instructor',l:'الدكتور',d:c.instructor||''},{k:'sort',l:'الترتيب',t:'number',d:c.sort_order}],'حفظ',async v=>{
+      await ok(sb.from('courses').update({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,sort_order:parseInt(v.sort,10)||0}).eq('id',id));
+      const T={monthly:['اشتراك شهر: ','1 month: '],course:['المادة كاملة: ','Full course: ']};
+      for(const k of Object.keys(T))await ok(sb.from('offers').update({title_ar:T[k][0]+v.title_ar,title_en:T[k][1]+v.title_en}).eq('course_id',id).eq('kind',k));
+      await load();render();toast('تم الحفظ');
+    },`<button type="button" class="btn bad" data-a="delcourse" data-v="${id}">حذف المادة</button>`);
+  },
+  editlesson(id){
+    const l=S.lessons.find(x=>x.id===id);
+    formModal('تعديل الدرس',[{k:'title_ar',l:'العنوان بالعربي',r:1,d:l.title_ar||''},{k:'title_en',l:'العنوان بالإنجليزي',r:1,d:l.title_en||''},
+     {k:'secs',l:'المدة بالثواني',t:'number',d:l.duration_seconds||''},{k:'sort',l:'الترتيب',t:'number',d:l.sort_order}],'حفظ',async v=>{
+      await ok(sb.from('lessons').update({title_ar:v.title_ar,title_en:v.title_en,duration_seconds:v.secs?parseInt(v.secs,10):null,sort_order:parseInt(v.sort,10)||0}).eq('id',id));
+      await ok(sb.from('offers').update({title_ar:'درس: '+v.title_ar,title_en:'Lesson: '+v.title_en}).eq('lesson_id',id).eq('kind','lesson'));
+      await load();render();toast('تم الحفظ');
+    },`<button type="button" class="btn bad" data-a="dellesson" data-v="${id}">حذف الدرس</button>`);
+  },
+  async delcourse(id){
+    const c=S.courses.find(x=>x.id===id);
+    if(!confirm(`حذف المادة «${c.title_ar||c.title_en}» نهائياً مع دروسها وملفاتها واشتراكات الطلاب فيها؟`))return;
+    try{for(const l of S.lessons.filter(x=>x.course_id===id))await rmLessonFiles(l.id);
+      await ok(sb.from('courses').delete().eq('id',id));closeModal();await load();render();toast('تم الحذف')}catch(e){toast(e.message)}
+  },
+  async dellesson(id){
+    const l=S.lessons.find(x=>x.id===id);
+    if(!confirm(`حذف الدرس «${l.title_ar||l.title_en}» نهائياً مع ملفاته واشتراكات الطلاب فيه؟`))return;
+    try{await rmLessonFiles(id);await ok(sb.from('lessons').delete().eq('id',id));closeModal();await load();render();toast('تم الحذف')}catch(e){toast(e.message)}
   },
   addcourse(){
     formModal('مادة جديدة',[{k:'code',l:'الكود (مثل AECH 2142)'},{k:'title_ar',l:'الاسم بالعربي',r:1},{k:'title_en',l:'الاسم بالإنجليزي',r:1},{k:'instructor',l:'الدكتور (اختياري)'}],'إضافة',async v=>{
