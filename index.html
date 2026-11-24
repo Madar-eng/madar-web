@@ -37,11 +37,13 @@ label{font-size:.9rem;color:var(--mut)}
 .msg{padding:10px;border-radius:10px;margin:8px 0;background:var(--card);border:1px solid var(--line)}
 .err{color:var(--bad)}.center{text-align:center}
 footer{margin-top:24px;text-align:center}
+.pdfbox{position:relative;background:#525659;border-radius:10px;padding:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.pdfbox canvas{display:block;width:100%;margin:0 auto 8px;background:#fff}.wmlay{position:absolute;inset:0;pointer-events:none}.ytwm{position:absolute;pointer-events:none;font-weight:700;font-size:15px;direction:ltr;transition:top 1.2s,left 1.2s;text-shadow:0 0 2px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
 <main id="app"></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const sb = supabase.createClient('https://dkuxxestxjmlplhodayi.supabase.co','sb_publishable_V06uZdHHbVbRrRei6jJ9XA_G-c7Eabm');
 const TX = {
@@ -83,13 +85,13 @@ async function boot(){
   S.view=null;S.pay=null;
   const r=await sb.rpc('bind_device',{p_device_id:deviceId(),p_device_name:'Web '+(navigator.platform||'')});
   S.bind=r.error?'error':r.data;
-  if(S.bind==='ok')await loadAll();
+  if(S.bind==='ok'){await loadAll();const pr=await sb.from('profiles').select('phone').eq('id',S.user.id).single();S.wm=(pr.data&&pr.data.phone)||S.user.email||'student'}
   render();
 }
 async function loadAll(){
   const [c,l,o,s,q,fl]=await Promise.all([
     sb.from('courses').select('id,code,title_en,title_ar,instructor').order('sort_order'),
-    sb.from('lessons').select('id,course_id,title_en,title_ar,duration_seconds').order('sort_order'),
+    sb.from('lessons').select('id,course_id,title_en,title_ar,duration_seconds,video_source,youtube_id').order('sort_order'),
     sb.from('offers').select('*').eq('is_active',true).order('sort_order'),
     sb.from('app_settings').select('key,value'),
     sb.from('payment_requests').select('*').order('created_at',{ascending:false}),
@@ -153,13 +155,39 @@ function reqsView(){
   ${r.reject_reason?`<div class="err">${t('reason')}: ${esc(r.reject_reason)}</div>`:''}</div>`).join('');
 }
 
+const wmCol=()=>S.cfg.wm_color||'#FF0000';
+const wmAlpha=()=>Math.min(1,Math.max(.1,parseFloat(S.cfg.wm_alpha||'.5')||.5));
 function playerView(){
-  const v=S.view;
-  return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button>
-  <div style="margin-top:10px">${v.error?`<div class="card err">${esc(t(v.error)===v.error?t('e_generic'):t(v.error))}${v.det?`<div class="mut" dir="ltr" style="font-size:.75rem;margin-top:6px;word-break:break-all">${esc(v.det)}</div>`:''}</div>`
-   :v.loading?`<div class="card center mut">${t('loading')}</div>`
-   :`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div>
-     <p class="mut center">${t('wm')}</p>`}</div>`;
+  const v=S.view;let inner;
+  if(v.error)inner=`<div class="card err">${esc(t(v.error)===v.error?t('e_generic'):t(v.error))}${v.det?`<div class="mut" dir="ltr" style="font-size:.75rem;margin-top:6px;word-break:break-all">${esc(v.det)}</div>`:''}</div>`;
+  else if(v.loading)inner=`<div class="card center mut">${t('loading')}</div>`;
+  else if(v.yt)inner=`<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.yt)}?rel=0&modestbranding=1&playsinline=1&fs=0" allow="encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <div id="wm" class="ytwm" style="top:12%;left:8%;color:${esc(wmCol())};opacity:${wmAlpha()}">${esc(S.wm||'')}</div></div><p class="mut center">${t('wm')}</p>`;
+  else if(v.pdf)inner=`<div id="pdfbox" class="pdfbox"><div class="center" style="color:#fff;padding:24px">${t('loading')}</div></div><p class="mut center">${t('wm')}</p>`;
+  else inner=`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div><p class="mut center">${t('wm')}</p>`;
+  return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button><div style="margin-top:10px">${inner}</div>`;
+}
+let wmT;
+function startWm(){clearInterval(wmT);wmT=setInterval(()=>{const e=$('#wm');if(!e){clearInterval(wmT);return}e.style.top=(6+Math.random()*78)+'%';e.style.left=(4+Math.random()*58)+'%'},4500)}
+function wmTile(){
+  const x=s=>String(s).replace(/[&<>"']/g,'');
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='14' y='100' transform='rotate(-24 140 85)' fill='${wmCol()}' fill-opacity='${wmAlpha()}' font-size='17' font-weight='700' font-family='sans-serif'>${x(S.wm||'')}</text></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+async function drawPdf(){
+  const box=$('#pdfbox');if(!box||!S.view||!S.view.pdfData)return;
+  try{
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const doc=await pdfjsLib.getDocument({data:S.view.pdfData.slice(0)}).promise;
+    box.innerHTML='';box.oncontextmenu=e=>e.preventDefault();
+    const w=box.clientWidth-16,dpr=Math.min(window.devicePixelRatio||1,2);
+    for(let i=1;i<=doc.numPages;i++){
+      const pg=await doc.getPage(i),sc=w/pg.getViewport({scale:1}).width,vp=pg.getViewport({scale:sc*dpr});
+      const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;c.style.height=(vp.height/dpr)+'px';
+      box.appendChild(c);await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    }
+    const lay=document.createElement('div');lay.className='wmlay';lay.style.backgroundImage=wmTile();box.appendChild(lay);
+  }catch(e){box.innerHTML=`<div class="card err">${t('e_generic')}</div>`}
 }
 
 function render(){
@@ -176,6 +204,8 @@ function render(){
      +`<footer><button class="btn danger sm" data-act="delete">${t('del')}</button></footer>`;
   }
   $('#app').innerHTML=head+body;
+  if(S.view&&S.view.yt)startWm();
+  if(S.view&&S.view.pdfData)drawPdf();
 }
 
 const A={
@@ -184,6 +214,8 @@ const A={
   async logout(){await sb.auth.signOut()},
   tab(v){S.tab=v;S.pay=null;S.err='';S.msg='';render()},
   async play(id){
+    const l0=S.lessons.find(x=>x.id===id);
+    if(l0&&l0.video_source==='youtube'&&l0.youtube_id){S.view={yt:l0.youtube_id};render();return}
     S.view={loading:true};render();
     const {data,error}=await sb.functions.invoke('get-otp',{body:{lesson_id:id,device_id:deviceId()}});
     if(error){let code='e_generic',det=String(error.name||'');
@@ -200,11 +232,15 @@ const A={
     await loadAll();S.tab='lessons';render();alert(t('code_ok'));
   },
   async openfile(path){
-    const w=window.open('about:blank','_blank');
+    const isPdf=/\.pdf$/i.test(path);
+    const w=isPdf?null:window.open('about:blank','_blank');
     const {data,error}=await sb.storage.from('lesson-files').createSignedUrl(path,300);
     if(error||!data){if(w)w.close();alert(t('e_generic'));return}
-    if(w)w.location.href=data.signedUrl;else location.href=data.signedUrl;
+    if(!isPdf){if(w)w.location.href=data.signedUrl;else location.href=data.signedUrl;return}
+    S.view={pdf:true};render();
+    try{const r=await fetch(data.signedUrl);S.view.pdfData=await r.arrayBuffer();drawPdf()}catch(e){S.view={error:'e_generic'};render()}
   },
+
   pay(id){S.pay=S.offers.find(o=>o.id===id);S.err='';S.msg='';render()},
   payback(){S.pay=null;S.err='';S.msg='';render()},
   async copy(v,el){try{await navigator.clipboard.writeText(S.cfg.fawran_alias||'');el.textContent=t('copied')}catch(e){}},

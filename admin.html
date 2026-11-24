@@ -78,7 +78,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const money=n=>Number(n).toLocaleString('en')+' ر.ق';
 const dt=x=>new Date(x).toLocaleString('ar-QA',{dateStyle:'medium',timeStyle:'short'});
 const ok=async p=>{const r=await p;if(r.error)throw r.error;return r.data};
-const S={user:null,admin:null,tab:'home',stats:null,codes:[],filter:'pending',q:'',err:'',busy:false,reqs:[],profs:[],devs:[],courses:[],lessons:[],offers:[]};
+const S={user:null,admin:null,tab:'home',stats:null,codes:[],cfg:{},filter:'pending',q:'',err:'',busy:false,reqs:[],profs:[],devs:[],courses:[],lessons:[],offers:[]};
 
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
 function openModal(h){$('#modal').innerHTML=`<div class="sheet">${h}</div>`;$('#modal').classList.add('on')}
@@ -100,7 +100,7 @@ async function boot(){
   render();
 }
 async function load(){
-  const [r,p,d,c,l,o,st,cd]=await Promise.all([
+  const [r,p,d,c,l,o,st,cd,cf]=await Promise.all([
     sb.from('payment_requests').select('*, student:profiles!user_id(full_name,email,phone)').order('created_at',{ascending:false}).limit(150),
     sb.from('profiles').select('id,full_name,email,phone,max_devices,is_active,is_admin,created_at').order('created_at',{ascending:false}),
     sb.from('user_devices').select('user_id'),
@@ -108,11 +108,15 @@ async function load(){
     sb.from('lessons').select('*').order('sort_order'),
     sb.from('offers').select('*').order('sort_order'),
     sb.rpc('admin_stats'),
-    sb.from('activation_codes').select('*').order('created_at',{ascending:false}).limit(300)]);
-  S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.stats=st.data||null;S.codes=cd.data||[];
+    sb.from('activation_codes').select('*').order('created_at',{ascending:false}).limit(300),
+    sb.from('app_settings').select('key,value')]);
+  S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.stats=st.data||null;S.codes=cd.data||[];S.cfg={};(cf.data||[]).forEach(x=>S.cfg[x.key]=x.value);
 }
 
 const KIND={pdf:'ملف PDF',exam:'امتحان',summary:'ملخص (NotebookLM)',audio:'ملف صوتي',image:'صورة',other:'آخر'};
+const ytId=s=>{const m=String(s).match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(String(s).trim())?String(s).trim():null)};
+const videoFields=v=>{if(v.src==='youtube'){const id=ytId(v.vid);if(!id)throw new Error('رابط يوتيوب غير صحيح');return{video_source:'youtube',youtube_id:id,vdocipher_video_id:null}}return{video_source:'vdocipher',youtube_id:null,vdocipher_video_id:v.vid.trim()}};
+const SRC=[['vdocipher','VdoCipher (محمي)'],['youtube','يوتيوب (غير مدرج)']];
 const nm=s=>s?.full_name||s?.email||'بدون اسم';
 const ot=r=>(S.offers.find(o=>o.id===r.offer_id)?.title_ar)||r.offer_title||'';
 function loginView(){
@@ -156,6 +160,9 @@ function studentsView(){
 
 function contentView(){
   return `<div class="row"><h2>المحتوى والأسعار</h2><div class="acts" style="margin:0"><button class="btn sm" data-a="addcourse">مادة جديدة</button><button class="btn sm" data-a="addlesson">درس جديد</button></div></div>
+  <div class="card row" style="align-items:center"><div><b>العلامة المائية</b><div class="mut">على الفيديو والـ PDF</div></div>
+   <div class="acts" style="margin:0;align-items:center"><span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:${esc(S.cfg.wm_color||'#FF0000')};opacity:${esc(S.cfg.wm_alpha||'0.5')}"></span>
+   <bdi>${Math.round((parseFloat(S.cfg.wm_alpha||'0.5')||0.5)*100)}%</bdi><button class="btn ghost sm" data-a="wmset">تعديل</button></div></div>
   ${S.courses.map(c=>{
     const ls=S.lessons.filter(l=>l.course_id===c.id),os=S.offers.filter(o=>o.course_id===c.id&&o.kind!=='lesson');
     return `<div class="card"><div class="row"><div><div class="big">${esc(c.title_ar||c.title_en)}</div><div class="mut"><bdi>${esc(c.code||'')}</bdi> <bdi>${esc(c.instructor||'')}</bdi></div></div>
@@ -164,6 +171,7 @@ function contentView(){
      ${ls.length?'<h3>الدروس</h3>':''}
      ${ls.map(l=>{const o=S.offers.find(x=>x.lesson_id===l.id);return `<div class="row" style="margin-top:8px;align-items:center"><span>${esc(l.title_ar||l.title_en)}</span><span class="acts" style="margin:0">
        ${o?`<button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button>`:''}
+       <button class="btn ghost sm" data-a="editvideo" data-v="${l.id}">الفيديو</button>
        <button class="btn ghost sm" data-a="files" data-v="${l.id}">الملفات</button>
        <button class="btn ${l.is_published?'ghost':''} sm" data-a="publesson" data-v="${l.id}">${l.is_published?'منشور':'مخفي'}</button></span></div>`}).join('')}</div>`}).join('')||'<div class="card mut">أضف أول مادة.</div>'}`;
 }
@@ -297,6 +305,19 @@ const A={
   },
   copyta(){const t=$('#cg');navigator.clipboard?.writeText(t.value).then(()=>toast('تم النسخ'),()=>t.select())},
   copycodes(){navigator.clipboard?.writeText(S.codes.filter(c=>!c.redeemed_by).map(c=>c.code).join('\n')).then(()=>toast('تم النسخ'))},
+  wmset(){
+    formModal('العلامة المائية',[{k:'color',l:'اللون',t:'color',d:S.cfg.wm_color||'#FF0000'},{k:'alpha',l:'الشفافية (من 10 إلى 100)',t:'number',d:Math.round((parseFloat(S.cfg.wm_alpha||'0.5')||0.5)*100),r:1}],'حفظ',async v=>{
+      const a=Math.min(100,Math.max(10,parseInt(v.alpha,10)||50))/100;
+      await ok(sb.from('app_settings').upsert([{key:'wm_color',value:v.color.toUpperCase()},{key:'wm_alpha',value:String(a)}],{onConflict:'key'}));
+      await load();render();toast('تم الحفظ');
+    });
+  },
+  editvideo(id){
+    const l=S.lessons.find(x=>x.id===id);
+    formModal('فيديو الدرس',[{k:'src',l:'مصدر الفيديو',o:SRC},{k:'vid',l:'كود VdoCipher أو رابط يوتيوب',r:1,d:(l.video_source==='youtube'?l.youtube_id:l.vdocipher_video_id)||''}],'حفظ',async v=>{
+      await ok(sb.from('lessons').update(videoFields(v)).eq('id',id));await load();render();toast('تم التحديث');
+    });
+  },
   addcourse(){
     formModal('مادة جديدة',[{k:'code',l:'الكود (مثل AECH 2142)'},{k:'title_ar',l:'الاسم بالعربي',r:1},{k:'title_en',l:'الاسم بالإنجليزي',r:1},{k:'instructor',l:'الدكتور (اختياري)'}],'إضافة',async v=>{
       await ok(sb.from('courses').insert({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,is_published:false,sort_order:S.courses.length+1}));
@@ -306,9 +327,9 @@ const A={
   addlesson(){
     if(!S.courses.length)return toast('أضف مادة أولاً');
     formModal('درس جديد',[{k:'course',l:'المادة',o:S.courses.map(c=>[c.id,c.title_ar||c.title_en])},{k:'title_ar',l:'العنوان بالعربي',r:1},{k:'title_en',l:'العنوان بالإنجليزي',r:1},
-     {k:'vid',l:'كود الفيديو من VdoCipher',r:1},{k:'secs',l:'المدة بالثواني (اختياري)',t:'number'},{k:'pub',l:'النشر',o:[['1','منشور'],['0','مخفي']]}],'إضافة',async v=>{
+     {k:'src',l:'مصدر الفيديو',o:SRC},{k:'vid',l:'كود VdoCipher أو رابط يوتيوب',r:1},{k:'secs',l:'المدة بالثواني (اختياري)',t:'number'},{k:'pub',l:'النشر',o:[['1','منشور'],['0','مخفي']]}],'إضافة',async v=>{
       const n=S.lessons.filter(l=>l.course_id===v.course).length+1;
-      await ok(sb.from('lessons').insert({course_id:v.course,title_ar:v.title_ar,title_en:v.title_en,vdocipher_video_id:v.vid.trim(),duration_seconds:v.secs?parseInt(v.secs,10):null,is_published:v.pub==='1',sort_order:n}));
+      await ok(sb.from('lessons').insert({course_id:v.course,title_ar:v.title_ar,title_en:v.title_en,...videoFields(v),duration_seconds:v.secs?parseInt(v.secs,10):null,is_published:v.pub==='1',sort_order:n}));
       await load();render();toast('تمت إضافة الدرس بسعره الافتراضي');
     });
   }
