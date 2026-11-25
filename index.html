@@ -37,7 +37,13 @@ label{font-size:.9rem;color:var(--mut)}
 .msg{padding:10px;border-radius:10px;margin:8px 0;background:var(--card);border:1px solid var(--line)}
 .err{color:var(--bad)}.center{text-align:center}
 footer{margin-top:24px;text-align:center}
-.pdfbox{position:relative;background:#525659;border-radius:10px;padding:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.pdfbox canvas{display:block;width:100%;margin:0 auto 8px;background:#fff}.wmlay{position:absolute;inset:0;pointer-events:none}.ctl{display:flex;align-items:center;gap:6px;margin-top:8px;direction:ltr}.ctl .btn{padding:6px 10px}.ytwm{position:absolute;pointer-events:none;font-weight:700;font-size:15px;direction:ltr;transition:top 1.2s,left 1.2s;text-shadow:0 0 2px rgba(0,0,0,.35)}
+.pdfbox{position:relative;background:#525659;border-radius:10px;padding:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.pdfbox canvas{display:block;width:100%;margin:0 auto 8px;background:#fff}.wmlay{position:absolute;inset:0;pointer-events:none}.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;direction:ltr}.pdfbox canvas{height:auto}.ytshield{position:absolute;inset:0;z-index:2;cursor:pointer;-webkit-touch-callout:none}.ytwm{z-index:3}.ytbox:fullscreen,.ytbox:-webkit-full-screen,.ytbox.fs{background:#000;display:flex;flex-direction:column;justify-content:center}.ytbox.fs{position:fixed;inset:0;z-index:60}.ytbox:fullscreen .vid,.ytbox:-webkit-full-screen .vid,.ytbox.fs .vid{padding-top:0;flex:1;border-radius:0}.ytbox:fullscreen .ctl,.ytbox:-webkit-full-screen .ctl,.ytbox.fs .ctl{padding:8px;margin:0;background:#000}.split{display:flex;gap:10px}.split.v{flex-direction:column}.split.h{flex-direction:row}.split .pane{flex:1;min-width:0}.split.h .pdfbox{max-height:82vh;overflow:auto}.split.v .pdfbox{max-height:75vh;overflow:auto}
+main.wide{max-width:1200px}
+select{padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit}.split.v>.pane:first-child{max-width:560px;width:100%;margin-inline:auto}.split{display:flex;gap:10px}.split>div{min-width:0}.split.h{flex-direction:row;align-items:flex-start}.split.h>div{flex:1}.split.v{flex-direction:column}.split .pdfbox{max-height:78vh;overflow:auto}
+.ytsh{position:absolute;inset:0;z-index:3;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ytsh span{font-size:3rem;color:#fff;display:none}.ytsh.off{background:#000}.ytsh.pz{background:rgba(0,0,0,.25)}.ytsh.off span,.ytsh.pz span{display:block}
+#ytplayer.full{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#ytplayer.full .vid{flex:1;padding-top:0;border-radius:0;min-height:0}#ytplayer.full .ctl{margin:0;padding:8px;background:#000}#ytplayer.full .ctl .mut{color:#ddd}.ctl .btn{padding:6px 10px}.ytwm{z-index:4;position:absolute;pointer-events:none;font-weight:700;font-size:15px;direction:ltr;transition:top 1.2s,left 1.2s;text-shadow:0 0 2px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
@@ -57,7 +63,7 @@ ar:{app:'مدار',tag:'كورسات هندسة',signin:'تسجيل الدخول
  e_generic:'حدث خطأ، حاول مرة أخرى.',e_file:'اختر صورة (JPG أو PNG) أو PDF بحجم أقل من 5 ميجا.',e_need:'أكمل البيانات المطلوبة.',
  device_limit:'تم الوصول للحد الأقصى من الأجهزة لحسابك. تواصل مع المدرّس لفك الربط.',disabled:'حسابك موقوف. تواصل مع المدرّس.',
  no_access:'هذا الدرس غير مفعّل لحسابك.',device_not_allowed:'هذا الجهاز غير مسجّل لحسابك. أعد تحميل الصفحة.',loading:'جارٍ التحميل…',
- wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',code_q:'عندك كود تفعيل؟',code_ph:'اكتب الكود',code_btn:'تفعيل',code_ok:'تم التفعيل. تقدر تشوف دروسك الآن.',code_bad:'الكود غير صحيح أو مستخدم من قبل.',code_many:'محاولات كثيرة. حاول بعد ساعة.',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
+ wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',both:'فيديو + PDF',side:'جنب بعض',stack:'فوق بعض',with_video:'مع الفيديو',split_h:'عرض أفقي',split_v:'عرض رأسي',code_q:'عندك كود تفعيل؟',code_ph:'اكتب الكود',code_btn:'تفعيل',code_ok:'تم التفعيل. تقدر تشوف دروسك الآن.',code_bad:'الكود غير صحيح أو مستخدم من قبل.',code_many:'محاولات كثيرة. حاول بعد ساعة.',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
 en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create account',email:'Email',pass:'Password',name:'Full name',phone:'Phone number',
  noacc:'No account? Create one',haveacc:'Have an account? Sign in',out:'Sign out',lessons:'My lessons',buy:'Subscribe',reqs:'My requests',
  nolessons:'No lessons are enabled for your account yet. Choose from the “Subscribe” tab.',back:'Back',min:'min',qar:'QAR',
@@ -68,7 +74,7 @@ en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create ac
  e_generic:'Something went wrong. Try again.',e_file:'Choose an image (JPG or PNG) or a PDF under 5 MB.',e_need:'Please fill in the required fields.',
  device_limit:'Your account reached its device limit. Contact your tutor to reset.',disabled:'Your account is disabled. Contact your tutor.',
  no_access:'This lesson is not enabled for your account.',device_not_allowed:'This device is not registered for your account. Reload the page.',loading:'Loading…',
- wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',code_q:'Have an activation code?',code_ph:'Enter code',code_btn:'Activate',code_ok:'Activated. You can see your lessons now.',code_bad:'The code is invalid or already used.',code_many:'Too many attempts. Try again in an hour.',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
+ wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',both:'Video + PDF',side:'Side by side',stack:'Stacked',with_video:'With video',split_h:'Side by side',split_v:'Stacked',code_q:'Have an activation code?',code_ph:'Enter code',code_btn:'Activate',code_ok:'Activated. You can see your lessons now.',code_bad:'The code is invalid or already used.',code_many:'Too many attempts. Try again in an hour.',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
 };
 let lang='ar';try{lang=localStorage.getItem('lang')||'ar'}catch(e){}
 const t=k=>TX[lang][k]||k;
@@ -119,8 +125,8 @@ function lessonsView(){
     if(!ls.length)return '';
     return `<div class="card"><b>${esc(pick(c,'title'))}</b><div class="mut">${esc([c.code,c.instructor].filter(Boolean).join(' • '))}</div>
     ${ls.map((l,i)=>`<div class="row" style="margin-top:10px"><span>${i+1}. ${esc(pick(l,'title'))}${l.duration_seconds?` <span class="mut">(${Math.round(l.duration_seconds/60)} ${t('min')})</span>`:''}</span>
-    <button class="btn sm" data-act="play" data-v="${l.id}">▶</button></div>
-    ${S.files.filter(f=>f.lesson_id===l.id).map(f=>`<div class="row" style="margin-top:4px;padding-inline-start:16px"><span class="mut">${t('k_'+f.kind)}: ${esc(pick(f,'title'))}</span><button class="btn ghost sm" data-act="openfile" data-v="${esc(f.storage_path)}">${t('open')}</button></div>`).join('')}`).join('')}</div>`;
+    <span style="display:flex;gap:6px">${S.files.some(f=>f.lesson_id===l.id&&/\.pdf$/i.test(f.storage_path))?`<button class="btn ghost sm" data-act="split" data-v="${l.id}">${t('both')}</button>`:''}<button class="btn sm" data-act="play" data-v="${l.id}">▶</button></span></div>
+    ${S.files.filter(f=>f.lesson_id===l.id).map(f=>`<div class="row" style="margin-top:4px;padding-inline-start:16px"><span class="mut">${t('k_'+f.kind)}: ${esc(pick(f,'title'))}</span><span style="display:flex;gap:6px"><button class="btn ghost sm" data-act="openfile" data-v="${esc(f.storage_path)}">${t('open')}</button></span></div>`).join('')}`).join('')}</div>`;
   }).join('');
 }
 
@@ -157,29 +163,46 @@ function reqsView(){
 
 const wmCol=()=>S.cfg.wm_color||'#FF0000';
 const wmAlpha=()=>Math.min(1,Math.max(.1,parseFloat(S.cfg.wm_alpha||'.5')||.5));
+const errCard=(c,det)=>`<div class="card err">${esc(t(c)===c?t('e_generic'):t(c))}${det?`<div class="mut" dir="ltr" style="font-size:.75rem;margin-top:6px;word-break:break-all">${esc(det)}</div>`:''}</div>`;
+function ytHtml(id){
+  const o=encodeURIComponent(location.origin);
+  return `<div class="ytbox" id="ytbox"><div class="vid"><iframe id="ytp" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"
+    src="https://www.youtube.com/embed/${encodeURIComponent(id)}?enablejsapi=1&controls=0&disablekb=1&fs=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0&origin=${o}"></iframe>
+    <div class="ytshield" data-act="ytplay"></div>
+    <div id="wm" class="ytwm" style="top:12%;left:8%;color:${esc(wmCol())};opacity:${wmAlpha()}">${esc(S.wm||'')}</div></div>
+    <div class="ctl"><button class="btn sm" id="ytb" data-act="ytplay">▶</button><button class="btn ghost sm" data-act="ytback">−10</button><button class="btn ghost sm" data-act="ytfwd">+10</button>
+    <input id="yts" type="range" min="0" max="1000" value="0" style="margin:0;flex:1;min-width:80px"><span id="ytt" class="mut" style="font-size:.8rem">0:00</span>
+    <button class="btn ghost sm" id="ytr" data-act="ytspeed">1x</button><button class="btn ghost sm" id="ytm" data-act="ytmute">🔊</button><button class="btn ghost sm" data-act="ytfs">⛶</button></div></div>
+    <p class="mut center">${t('wm')}</p>`;
+}
+const vdoHtml=v=>`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div><p class="mut center">${t('wm')}</p>`;
 function playerView(){
   const v=S.view;let inner;
-  if(v.error)inner=`<div class="card err">${esc(t(v.error)===v.error?t('e_generic'):t(v.error))}${v.det?`<div class="mut" dir="ltr" style="font-size:.75rem;margin-top:6px;word-break:break-all">${esc(v.det)}</div>`:''}</div>`;
+  if(v.split){
+    const files=S.files.filter(f=>f.lesson_id===v.lid&&/\.pdf$/i.test(f.storage_path));
+    const sel=files.length>1?`<select id="spf" style="margin:0;width:auto;max-width:55%">${files.map(f=>`<option value="${esc(f.storage_path)}" ${f.storage_path===v.fpath?'selected':''}>${esc(pick(f,'title'))}</option>`).join('')}</select>`:'';
+    const media=v.loading?`<div class="card center mut">${t('loading')}</div>`:v.merror?errCard(v.merror):v.yt?ytHtml(v.yt):vdoHtml(v);
+    const pdf=v.perror?errCard('e_generic'):`<div id="pdfbox" class="pdfbox"><div class="center" style="color:#fff;padding:24px">${t('loading')}</div></div>`;
+    inner=`<div class="row" style="margin-bottom:8px"><button class="btn ghost sm" data-act="splitdir">${v.dir==='h'?t('stack'):t('side')}</button>${sel}</div>
+     <div class="split ${v.dir}"><div class="pane">${media}</div><div class="pane">${pdf}</div></div>`;
+  }
+  else if(v.error)inner=errCard(v.error,v.det);
   else if(v.loading)inner=`<div class="card center mut">${t('loading')}</div>`;
-  else if(v.yt)inner=`<div class="vid"><div id="ytp"></div><div id="wm" class="ytwm" style="top:12%;left:8%;color:${esc(wmCol())};opacity:${wmAlpha()}">${esc(S.wm||'')}</div></div>
-    <div class="ctl"><button class="btn sm" id="ytb" data-act="ytplay">▶</button><button class="btn ghost sm" data-act="ytback">−10</button><button class="btn ghost sm" data-act="ytfwd">+10</button>
-    <input id="yts" type="range" min="0" max="1000" value="0" style="margin:0;flex:1"><span id="ytt" class="mut" style="font-size:.8rem">0:00</span>
-    <button class="btn ghost sm" id="ytr" data-act="ytspeed">1x</button><button class="btn ghost sm" id="ytm" data-act="ytmute">🔊</button></div><p class="mut center">${t('wm')}</p>`;
+  else if(v.yt)inner=ytHtml(v.yt);
   else if(v.pdf)inner=`<div id="pdfbox" class="pdfbox"><div class="center" style="color:#fff;padding:24px">${t('loading')}</div></div><p class="mut center">${t('wm')}</p>`;
-  else inner=`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div><p class="mut center">${t('wm')}</p>`;
+  else inner=vdoHtml(v);
   return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button><div style="margin-top:10px">${inner}</div>`;
 }
 let wmT,ytP=null,ytTimer,ytDrag=false;
 function startWm(){clearInterval(wmT);wmT=setInterval(()=>{const e=$('#wm');if(!e){clearInterval(wmT);return}e.style.top=(6+Math.random()*78)+'%';e.style.left=(4+Math.random()*58)+'%'},4500)}
 const fmt=s=>{s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 function loadYT(){return new Promise(res=>{if(window.YT&&YT.Player)return res();window.onYouTubeIframeAPIReady=res;const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})}
-async function startYt(id){
+async function startYt(){
   await loadYT();if(!$('#ytp'))return;
-  ytP=new YT.Player('ytp',{videoId:id,playerVars:{controls:0,disablekb:1,fs:0,rel:0,modestbranding:1,playsinline:1,iv_load_policy:3,cc_load_policy:0,origin:location.origin},
-    events:{onStateChange:e=>{const b=$('#ytb');if(b)b.textContent=e.data===1?'⏸':'▶'}}});
+  ytP=new YT.Player('ytp',{events:{onStateChange:e=>{const b=$('#ytb');if(b)b.textContent=e.data===1?'⏸':'▶'}}});
   clearInterval(ytTimer);
   ytTimer=setInterval(()=>{const s=$('#yts');if(!ytP||!ytP.getCurrentTime||!s){return}const d=ytP.getDuration()||0,c=ytP.getCurrentTime()||0;
-    if(!ytDrag)s.value=d?Math.round(c/d*1000):0;$('#ytt').textContent=fmt(c)+' / '+fmt(d)},500);
+    if(!ytDrag)s.value=d?Math.round(c/d*1000):0;const tt=$('#ytt');if(tt)tt.textContent=fmt(c)+' / '+fmt(d)},500);
 }
 function wmTile(){
   const x=s=>String(s).replace(/[&<>"']/g,'');
@@ -192,13 +215,14 @@ async function drawPdf(){
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     const doc=await pdfjsLib.getDocument({data:S.view.pdfData.slice(0)}).promise;
     box.innerHTML='';box.oncontextmenu=e=>e.preventDefault();
+    const inn=document.createElement('div');inn.style.position='relative';box.appendChild(inn);
     const w=box.clientWidth-16,dpr=Math.min(window.devicePixelRatio||1,2);
     for(let i=1;i<=doc.numPages;i++){
       const pg=await doc.getPage(i),sc=w/pg.getViewport({scale:1}).width,vp=pg.getViewport({scale:sc*dpr});
-      const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;c.style.height=(vp.height/dpr)+'px';
-      box.appendChild(c);await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+      inn.appendChild(c);await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
     }
-    const lay=document.createElement('div');lay.className='wmlay';lay.style.backgroundImage=wmTile();box.appendChild(lay);
+    const lay=document.createElement('div');lay.className='wmlay';lay.style.backgroundImage=wmTile();inn.appendChild(lay);
   }catch(e){box.innerHTML=`<div class="card err">${t('e_generic')}</div>`}
 }
 
@@ -216,6 +240,7 @@ function render(){
      +`<footer><button class="btn danger sm" data-act="delete">${t('del')}</button></footer>`;
   }
   $('#app').innerHTML=head+body;
+  $('#app').className=(S.view&&S.view.split)?'wide':'';
   if(S.view&&S.view.yt){startWm();startYt(S.view.yt)}
   if(S.view&&S.view.pdfData)drawPdf();
 }
@@ -226,8 +251,8 @@ const A={
   async logout(){await sb.auth.signOut()},
   tab(v){S.tab=v;S.pay=null;S.err='';S.msg='';render()},
   async play(id){
-    const l0=S.lessons.find(x=>x.id===id);
-    if(l0&&l0.video_source==='youtube'&&l0.youtube_id){S.view={yt:l0.youtube_id};render();return}
+    const l=S.lessons.find(x=>x.id===id);if(!l)return;
+    if(l.video_source==='youtube'&&l.youtube_id){S.view={yt:l.youtube_id};render();return}
     S.view={loading:true};render();
     const {data,error}=await sb.functions.invoke('get-otp',{body:{lesson_id:id,device_id:deviceId()}});
     if(error){let code='e_generic',det=String(error.name||'');
@@ -236,7 +261,36 @@ const A={
     else S.view={otp:data.otp,pi:data.playbackInfo};
     render();
   },
-  closeplayer(){if(ytP&&ytP.destroy){try{ytP.destroy()}catch(e){}}ytP=null;clearInterval(ytTimer);S.view=null;render()},
+  closeplayer(){
+    if((document.fullscreenElement||document.webkitFullscreenElement)&&(document.exitFullscreen||document.webkitExitFullscreen)){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}}
+    document.body.style.overflow='';
+    if(ytP&&ytP.destroy){try{ytP.destroy()}catch(e){}}ytP=null;clearInterval(ytTimer);S.view=null;render();
+  },
+  ytfs(){
+    const el=$('#ytbox');if(!el)return;
+    const isFs=document.fullscreenElement||document.webkitFullscreenElement||el.classList.contains('fs');
+    if(isFs){if(document.exitFullscreen)document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen();el.classList.remove('fs');return}
+    const req=el.requestFullscreen||el.webkitRequestFullscreen;
+    if(req){try{const p=req.call(el);if(p&&p.catch)p.catch(()=>el.classList.add('fs'))}catch(e){el.classList.add('fs')}}else el.classList.add('fs');
+  },
+  async split(lid){
+    const l=S.lessons.find(x=>x.id===lid),f=S.files.find(x=>x.lesson_id===lid&&/\.pdf$/i.test(x.storage_path));
+    if(!l||!f)return;
+    const v=S.view={split:true,lid,dir:innerWidth>=800?'h':'v',fpath:f.storage_path,loading:true};render();
+    if(l.video_source==='youtube'&&l.youtube_id)v.yt=l.youtube_id;
+    else{
+      const {data,error}=await sb.functions.invoke('get-otp',{body:{lesson_id:lid,device_id:deviceId()}});
+      if(error){let code='e_generic';try{code=(await error.context.json()).error||code}catch(e){}v.merror=code}
+      else{v.otp=data.otp;v.pi=data.playbackInfo}
+    }
+    try{const u=await sb.storage.from('lesson-files').createSignedUrl(f.storage_path,300);const r=await fetch(u.data.signedUrl);v.pdfData=await r.arrayBuffer()}catch(e){v.perror=true}
+    if(S.view!==v)return;v.loading=false;render();
+  },
+  splitdir(){const v=S.view;if(!v||!v.split)return;v.dir=v.dir==='h'?'v':'h';const sp=$('.split');if(sp)sp.className='split '+v.dir;const b=$('[data-act="splitdir"]');if(b)b.textContent=v.dir==='h'?t('stack'):t('side')},
+  async splitfile(path){
+    const v=S.view;if(!v||!v.split)return;v.fpath=path;const box=$('#pdfbox');if(box)box.innerHTML=`<div class="center" style="color:#fff;padding:24px">${t('loading')}</div>`;
+    try{const u=await sb.storage.from('lesson-files').createSignedUrl(path,300);const r=await fetch(u.data.signedUrl);v.pdfData=await r.arrayBuffer();drawPdf()}catch(e){if(box)box.innerHTML=`<div class="card err">${t('e_generic')}</div>`}
+  },
   ytplay(){if(!ytP)return;ytP.getPlayerState()===1?ytP.pauseVideo():ytP.playVideo()},
   ytback(){if(ytP)ytP.seekTo(Math.max(0,ytP.getCurrentTime()-10),true)},
   ytfwd(){if(ytP)ytP.seekTo(ytP.getCurrentTime()+10,true)},
@@ -285,7 +339,8 @@ const A={
 };
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;e.preventDefault();A[el.dataset.act]?.(el.dataset.v,el)});
 document.addEventListener('pointerdown',e=>{if(e.target.id==='yts')ytDrag=true});
-document.addEventListener('change',e=>{if(e.target.id==='yts'){ytDrag=false;if(ytP&&ytP.getDuration)ytP.seekTo(ytP.getDuration()*e.target.value/1000,true)}});
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.ytshield,.pdfbox'))e.preventDefault()});
+document.addEventListener('change',e=>{if(e.target.id==='spf')A.splitfile(e.target.value);if(e.target.id==='yts'){ytDrag=false;if(ytP&&ytP.getDuration)ytP.seekTo(ytP.getDuration()*e.target.value/1000,true)}});
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='af')return;e.preventDefault();
   const email=$('#a_e').value.trim(),pw=$('#a_w').value;
