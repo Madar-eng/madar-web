@@ -78,7 +78,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const money=n=>Number(n).toLocaleString('en')+' ر.ق';
 const dt=x=>new Date(x).toLocaleString('ar-QA',{dateStyle:'medium',timeStyle:'short'});
 const ok=async p=>{const r=await p;if(r.error)throw r.error;return r.data};
-const S={user:null,admin:null,tab:'home',stats:null,codes:[],cfg:{},filter:'pending',q:'',err:'',busy:false,reqs:[],profs:[],devs:[],courses:[],lessons:[],offers:[]};
+const S={user:null,admin:null,tab:'home',stats:null,codes:[],cfg:{},filter:'pending',q:'',err:'',busy:false,reqs:[],profs:[],devs:[],courses:[],lessons:[],offers:[],announcements:[],meetings:[],quizzes:[]};
 
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2600)}
 function openModal(h){$('#modal').innerHTML=`<div class="sheet">${h}</div>`;$('#modal').classList.add('on')}
@@ -86,7 +86,7 @@ function closeModal(){$('#modal').classList.remove('on');$('#modal').innerHTML='
 function formModal(title,fields,label,onOk,extra=''){
   openModal(`<h3 style="margin-top:0">${title}</h3><form id="mf">${fields.map(f=>`<label>${f.l}</label>`+(f.o
     ?`<select name="${f.k}">${f.o.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('')}</select>`
-    :`<input name="${f.k}" ${f.t?`type="${f.t}"`:''} ${f.r?'required':''} ${f.d!=null?`value="${esc(f.d)}"`:''} ${f.a?`accept="${f.a}"`:''}>`)).join('')}
+    :f.ta?`<textarea name="${f.k}" ${f.r?'required':''} placeholder="${esc(f.p||'')}"></textarea>`:`<input name="${f.k}" ${f.t?`type="${f.t}"`:''} ${f.r?'required':''} ${f.d!=null?`value="${esc(f.d)}"`:''} ${f.a?`accept="${f.a}"`:''}>`)).join('')}
     <div class="acts"><button class="btn">${label}</button><button type="button" class="btn ghost" data-a="close">إلغاء</button>${extra}</div></form>`);
   $('#mf').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;
     try{await onOk(Object.fromEntries(new FormData(e.target)));closeModal()}catch(x){toast(x.message||'حدث خطأ');b.disabled=false}};
@@ -100,7 +100,7 @@ async function boot(){
   render();
 }
 async function load(){
-  const [r,p,d,c,l,o,st,cd,cf]=await Promise.all([
+  const [r,p,d,c,l,o,st,cd,cf,an,mt,qz]=await Promise.all([
     sb.from('payment_requests').select('*, student:profiles!user_id(full_name,email,phone)').order('created_at',{ascending:false}).limit(150),
     sb.from('profiles').select('id,full_name,email,phone,max_devices,is_active,is_admin,created_at').order('created_at',{ascending:false}),
     sb.from('user_devices').select('user_id'),
@@ -109,8 +109,11 @@ async function load(){
     sb.from('offers').select('*').order('sort_order'),
     sb.rpc('admin_stats'),
     sb.from('activation_codes').select('*').order('created_at',{ascending:false}).limit(300),
-    sb.from('app_settings').select('key,value')]);
-  S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.stats=st.data||null;S.codes=cd.data||[];S.cfg={};(cf.data||[]).forEach(x=>S.cfg[x.key]=x.value);
+    sb.from('app_settings').select('key,value'),
+    sb.from('announcements').select('*,course:courses(title_ar,title_en)').order('created_at',{ascending:false}),
+    sb.from('meetings').select('*,course:courses(title_ar,title_en)').order('starts_at',{ascending:false}),
+    sb.from('quizzes').select('*,course:courses(title_ar,title_en),lesson:lessons(title_ar,title_en),qn:quiz_questions(count)').order('created_at',{ascending:false})]);
+  S.reqs=r.data||[];S.profs=p.data||[];S.devs=d.data||[];S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.stats=st.data||null;S.codes=cd.data||[];S.announcements=an.data||[];S.meetings=mt.data||[];S.quizzes=qz.data||[];S.cfg={};(cf.data||[]).forEach(x=>S.cfg[x.key]=x.value);
 }
 
 async function rmLessonFiles(lid){
@@ -169,7 +172,7 @@ function contentView(){
    <bdi>${Math.round((parseFloat(S.cfg.wm_alpha||'0.5')||0.5)*100)}%</bdi><button class="btn ghost sm" data-a="wmset">تعديل</button></div></div>
   ${S.courses.map(c=>{
     const ls=S.lessons.filter(l=>l.course_id===c.id),os=S.offers.filter(o=>o.course_id===c.id&&o.kind!=='lesson');
-    return `<div class="card"><div class="row"><div><div class="big">${esc(c.title_ar||c.title_en)}</div><div class="mut"><bdi>${esc(c.code||'')}</bdi> <bdi>${esc(c.instructor||'')}</bdi></div></div>
+    return `<div class="card">${c.cover_url?`<img src="${esc(c.cover_url)}" alt="" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin-bottom:8px">`:''}<div class="row"><div><div class="big">${esc(c.title_ar||c.title_en)}</div><div class="mut"><bdi>${esc(c.code||'')}</bdi> <bdi>${esc(c.instructor||'')}</bdi></div></div>
      <span class="acts" style="margin:0"><button class="btn ghost sm" data-a="editcourse" data-v="${c.id}">تعديل</button><button class="btn ${c.is_published?'ghost':''} sm" data-a="pubcourse" data-v="${c.id}">${c.is_published?'منشورة':'مخفية'}</button></span></div>
      ${os.map(o=>`<div class="row" style="margin-top:8px"><span>${esc(o.title_ar)}</span><button class="btn ghost sm" data-a="price" data-v="${o.id}">${money(o.price_qar)}</button></div>`).join('')}
      ${ls.length?'<h3>الدروس</h3>':''}
@@ -206,17 +209,24 @@ function codesView(){
    <span class="pill ${c.redeemed_by?'rejected':'approved'}">${c.redeemed_by?'مستخدم':'متاح'}</span></div>`).join('')||'<div class="card mut">لا توجد أكواد بعد.</div>'}`;
 }
 
+function learningView(){
+  const announcementCards=S.announcements.map(a=>`<div class="card"><div class="row"><div><div class="big">${esc(a.title)}</div><div class="mut">${a.audience==='course'?esc(a.course?.title_ar||a.course?.title_en||'مادة محددة'):'كل الطلاب'} · ${dt(a.created_at)}</div></div><span class="pill ${a.is_published?'approved':'pending'}">${a.is_published?'منشور':'مسودة'}</span></div><p>${esc(a.body)}</p><div class="acts"><button class="btn ghost sm" data-a="pubannouncement" data-v="${a.id}">${a.is_published?'إخفاء':'نشر'}</button></div></div>`).join('');
+  const meetingCards=S.meetings.map(m=>`<div class="card"><div class="row"><div><div class="big">${esc(m.title)}</div><div class="mut">${dt(m.starts_at)} · ${m.provider==='google_meet'?'Google Meet':m.provider==='zoom'?'Zoom':'رابط مباشر'}</div></div><span class="pill ${m.is_published?'approved':'pending'}">${m.is_published?'منشور':'مسودة'}</span></div><div class="acts"><a class="btn ghost sm" href="${esc(m.meeting_url)}" target="_blank" rel="noopener">فتح الرابط</a><button class="btn ghost sm" data-a="pubmeeting" data-v="${m.id}">${m.is_published?'إخفاء':'نشر'}</button></div></div>`).join('');
+  const quizCards=S.quizzes.map(q=>`<div class="card"><div class="row"><div><div class="big">${esc(q.title)}</div><div class="mut">${esc(q.course?.title_ar||q.course?.title_en||'')} · ${q.qn&&q.qn[0]?q.qn[0].count:0} سؤال</div></div><span class="pill ${q.status==='published'?'approved':'pending'}">${q.status}</span></div><div class="acts"><button class="btn ghost sm" data-a="pubquiz" data-v="${q.id}">${q.status==='published'?'إخفاء':'نشر'}</button><button class="btn ghost sm" data-a="importquiz" data-v="${q.id}">استيراد أسئلة</button><button class="btn ghost sm" data-a="genquiz" data-v="${q.id}">توليد من PDF (مدفوع)</button></div></div>`).join('');
+  return `<div class="row"><h2>التعلّم والتواصل</h2><div class="acts" style="margin:0"><button class="btn sm" data-a="addannouncement">إعلان جديد</button><button class="btn sm" data-a="addmeeting">لقاء مباشر</button><button class="btn sm" data-a="addquiz">اختبار MCQ</button></div></div><h3>الإعلانات</h3>${announcementCards||'<div class="card mut">لا توجد إعلانات بعد.</div>'}<h3>اللقاءات المباشرة</h3>${meetingCards||'<div class="card mut">لا توجد لقاءات بعد.</div>'}<h3>الاختبارات</h3>${quizCards||'<div class="card mut">لا توجد اختبارات بعد.</div>'}`;
+}
+
 function render(){
   const app=$('#app');
   if(!S.user){app.innerHTML=loginView();return}
   if(S.admin===null){app.innerHTML='<div class="login mut">جارٍ التحميل…</div>';return}
   if(!S.admin){app.innerHTML=`<div class="login"><p class="err">هذا الحساب ليس أدمن.</p><button class="btn" data-a="logout">خروج</button></div>`;return}
   const pend=S.reqs.filter(r=>r.status==='pending').length;
-  const T=[['home','الرئيسية'],['pay','الدفع'],['students','الطلاب'],['content','المحتوى'],['codes','الأكواد']];
+  const T=[['home','الرئيسية'],['pay','الدفع'],['students','الطلاب'],['content','المحتوى'],['learning','التعلّم'],['codes','الأكواد']];
   app.innerHTML=`<div class="shell"><nav><div class="brand"><div class="logo"></div><div><b>مدار</b><span>لوحة التحكم</span></div></div>
    ${T.map(([k,t])=>`<button class="t ${S.tab===k?'on':''}" data-a="tab" data-v="${k}">${t}${k==='pay'&&pend?`<span class="cnt">${pend}</span>`:''}</button>`).join('')}
    <div class="sp"></div><button class="t" data-a="logout">خروج</button></nav>
-   <main>${({home:homeView,pay:payView,students:studentsView,content:contentView,codes:codesView}[S.tab]||homeView)()}</main></div>`;
+   <main>${({home:homeView,pay:payView,students:studentsView,content:contentView,learning:learningView,codes:codesView}[S.tab]||homeView)()}</main></div>`;
 }
 
 const A={
@@ -326,8 +336,8 @@ const A={
   editcourse(id){
     const c=S.courses.find(x=>x.id===id);
     formModal('تعديل المادة',[{k:'code',l:'الكود',d:c.code||''},{k:'title_ar',l:'الاسم بالعربي',r:1,d:c.title_ar||''},{k:'title_en',l:'الاسم بالإنجليزي',r:1,d:c.title_en||''},
-     {k:'instructor',l:'الدكتور',d:c.instructor||''},{k:'sort',l:'الترتيب',t:'number',d:c.sort_order}],'حفظ',async v=>{
-      await ok(sb.from('courses').update({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,sort_order:parseInt(v.sort,10)||0}).eq('id',id));
+     {k:'instructor',l:'الدكتور',d:c.instructor||''},{k:'cover_url',l:'رابط صورة الغلاف',d:c.cover_url||''},{k:'sort',l:'الترتيب',t:'number',d:c.sort_order}],'حفظ',async v=>{
+      await ok(sb.from('courses').update({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,cover_url:v.cover_url||null,sort_order:parseInt(v.sort,10)||0}).eq('id',id));
       const T={monthly:['اشتراك شهر: ','1 month: '],course:['المادة كاملة: ','Full course: ']};
       for(const k of Object.keys(T))await ok(sb.from('offers').update({title_ar:T[k][0]+v.title_ar,title_en:T[k][1]+v.title_en}).eq('course_id',id).eq('kind',k));
       await load();render();toast('تم الحفظ');
@@ -358,6 +368,35 @@ const A={
       await ok(sb.from('courses').insert({code:v.code||null,title_ar:v.title_ar,title_en:v.title_en,instructor:v.instructor||null,is_published:false,sort_order:S.courses.length+1}));
       await load();render();toast('تمت الإضافة، انشرها عند الجاهزية');
     });
+  },
+  addannouncement(){
+    formModal('إعلان جديد',[{k:'title',l:'العنوان',r:1},{k:'body',l:'النص',r:1},{k:'audience',l:'الجمهور',o:[['all','كل الطلاب'],['course','مادة محددة']]},{k:'course_id',l:'المادة',o:[['','كل المواد'],...S.courses.map(c=>[c.id,c.title_ar||c.title_en])]}],'نشر',async v=>{await ok(sb.from('announcements').insert({title:v.title,body:v.body,audience:v.audience,course_id:v.course_id||null,is_published:true,created_by:S.user.id}));await load();render();toast('تم نشر الإعلان')});
+  },
+  async pubannouncement(id){const x=S.announcements.find(a=>a.id===id);await ok(sb.from('announcements').update({is_published:!x.is_published}).eq('id',id));await load();render()},
+  addmeeting(){
+    formModal('لقاء مباشر',[{k:'title',l:'العنوان',r:1},{k:'description',l:'الوصف'},{k:'meeting_url',l:'رابط Zoom أو Google Meet',r:1},{k:'provider',l:'المنصة',o:[['zoom','Zoom'],['google_meet','Google Meet'],['other','أخرى']]},{k:'starts_at',l:'وقت البداية',t:'datetime-local',r:1},{k:'duration_minutes',l:'المدة بالدقائق',t:'number',d:'60',r:1},{k:'audience',l:'الجمهور',o:[['all','كل الطلاب'],['course','مادة محددة']]},{k:'course_id',l:'المادة',o:[['','كل المواد'],...S.courses.map(c=>[c.id,c.title_ar||c.title_en])]}],'نشر',async v=>{await ok(sb.from('meetings').insert({title:v.title,description:v.description||null,meeting_url:v.meeting_url,provider:v.provider,starts_at:new Date(v.starts_at).toISOString(),duration_minutes:parseInt(v.duration_minutes,10)||60,audience:v.audience,course_id:v.course_id||null,is_published:true,created_by:S.user.id}));await load();render();toast('تم نشر اللقاء')});
+  },
+  async pubmeeting(id){const x=S.meetings.find(a=>a.id===id);await ok(sb.from('meetings').update({is_published:!x.is_published}).eq('id',id));await load();render()},
+  addquiz(){
+    formModal('اختبار MCQ',[{k:'course_id',l:'المادة',o:S.courses.map(c=>[c.id,c.title_ar||c.title_en])},{k:'lesson_id',l:'الدرس (اختياري)',o:[['','بدون درس'],...S.lessons.map(l=>[l.id,l.title_ar||l.title_en])]},{k:'title',l:'عنوان الاختبار',r:1},{k:'description',l:'وصف مختصر'},{k:'pass_percent',l:'نسبة النجاح',t:'number',d:'50',r:1}],'إنشاء',async v=>{await ok(sb.from('quizzes').insert({course_id:v.course_id,lesson_id:v.lesson_id||null,title:v.title,description:v.description||null,pass_percent:parseInt(v.pass_percent,10)||50,status:'draft',created_by:S.user.id}));await load();render();toast('أُنشئ الاختبار. ارفع PDF ثم ولّد الأسئلة')});
+  },
+  async pubquiz(id){const x=S.quizzes.find(q=>q.id===id);await ok(sb.from('quizzes').update({status:x.status==='published'?'draft':'published'}).eq('id',id));await load();render()},
+  importquiz(id){
+    formModal('استيراد أسئلة (JSON)',[{k:'json',l:'الصق JSON الأسئلة (أنا بجهّزه لك من أي PDF)',ta:1,r:1,p:'{"questions":[{"q":"السؤال","options":["أ","ب","ج","د"],"answer":1,"explain":"الشرح"}]}'}],'استيراد',async v=>{
+      let d;try{d=JSON.parse(v.json)}catch(e){throw new Error('JSON غير صحيح')}
+      const qs=Array.isArray(d)?d:d.questions;if(!Array.isArray(qs)||!qs.length)throw new Error('لا توجد أسئلة');
+      const base=(await ok(sb.from('quiz_questions').select('id').eq('quiz_id',id))).length;
+      const rows=qs.map((x,i)=>{
+        const body=String(x.q||x.question||x.question_text||'').trim();let opts=x.options,ans=x.answer;
+        if(x.type==='tf'||typeof ans==='boolean'||ans==='true'||ans==='false'){opts=['صح','خطأ'];ans=(ans===true||ans==='true')?0:1}
+        if(!body||!Array.isArray(opts)||opts.length<2||opts.length>6||!Number.isInteger(ans)||ans<0||ans>=opts.length)throw new Error('سؤال غير صحيح رقم '+(i+1));
+        return{quiz_id:id,question_order:base+i,question_text:body,options:opts.map(String),correct_option:ans,explanation:x.explain||x.explanation||null,points:(Number.isInteger(x.points)&&x.points>0)?x.points:1};
+      });
+      await ok(sb.from('quiz_questions').insert(rows));await load();render();toast('تم استيراد '+rows.length+' سؤال');
+    });
+  },
+  genquiz(id){
+    formModal('توليد أسئلة من PDF',[{k:'pdf',l:'ملف PDF',t:'file',r:1,a:'application/pdf'},{k:'count',l:'عدد الأسئلة',t:'number',d:'10',r:1}],'توليد',async v=>{const f=v.pdf;if(!f||f.type!=='application/pdf')throw new Error('اختر ملف PDF');const ab=await f.arrayBuffer();const pdf=await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs');const doc=await pdf.getDocument({data:ab}).promise;let text='';for(let i=1;i<=doc.numPages;i++){const p=await doc.getPage(i);const c=await p.getTextContent();text+=c.items.map(x=>x.str).join(' ')+'\n'};const res=await sb.functions.invoke('generate-mcq-from-pdf',{body:{quiz_id:id,pdf_text:text,count:parseInt(v.count,10)||10}});if(res.error)throw res.error;await load();render();toast(`تم توليد ${res.data?.count||0} سؤال`)});
   },
   addlesson(){
     if(!S.courses.length)return toast('أضف مادة أولاً');

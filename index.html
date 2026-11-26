@@ -54,7 +54,7 @@ select{padding:8px;border:1px solid var(--line);border-radius:10px;background:va
 const sb = supabase.createClient('https://dkuxxestxjmlplhodayi.supabase.co','sb_publishable_V06uZdHHbVbRrRei6jJ9XA_G-c7Eabm');
 const TX = {
 ar:{app:'مدار',tag:'كورسات هندسة',signin:'تسجيل الدخول',signup:'إنشاء حساب',email:'البريد الإلكتروني',pass:'كلمة المرور',name:'الاسم الكامل',phone:'رقم الموبايل',
- noacc:'ليس لديك حساب؟ أنشئ حساباً',haveacc:'لديك حساب؟ سجّل الدخول',out:'خروج',lessons:'دروسي',buy:'الاشتراك',reqs:'طلباتي',
+ noacc:'ليس لديك حساب؟ أنشئ حساباً',haveacc:'لديك حساب؟ سجّل الدخول',out:'خروج',lessons:'دروسي',buy:'الاشتراك',reqs:'طلباتي',learning:'التعلّم',announcements:'الإعلانات',meetings:'اللقاءات',quizzes:'الاختبارات',start:'ابدأ الاختبار',no_learning:'لا توجد تحديثات حالياً',
  nolessons:'لا توجد دروس مفعّلة لحسابك بعد. اختر من تبويب «الاشتراك».',back:'رجوع',min:'دقيقة',qar:'ريال',
  monthly:'اشتراك شهري',course:'مادة كاملة',lesson:'درس واحد',pay:'ادفع الآن',alias:'حوّل عبر فوري إلى الاسم:',copy:'نسخ',copied:'تم النسخ',
  amount:'المبلغ',sender:'الاسم الذي حوّلت به',receipt:'صورة إيصال التحويل',send:'إرسال الإيصال',sent:'تم إرسال طلبك. سيتم التفعيل بعد مراجعة الإيصال.',
@@ -63,9 +63,9 @@ ar:{app:'مدار',tag:'كورسات هندسة',signin:'تسجيل الدخول
  e_generic:'حدث خطأ، حاول مرة أخرى.',e_file:'اختر صورة (JPG أو PNG) أو PDF بحجم أقل من 5 ميجا.',e_need:'أكمل البيانات المطلوبة.',
  device_limit:'تم الوصول للحد الأقصى من الأجهزة لحسابك. تواصل مع المدرّس لفك الربط.',disabled:'حسابك موقوف. تواصل مع المدرّس.',
  no_access:'هذا الدرس غير مفعّل لحسابك.',device_not_allowed:'هذا الجهاز غير مسجّل لحسابك. أعد تحميل الصفحة.',loading:'جارٍ التحميل…',
- wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',both:'فيديو + PDF',side:'جنب بعض',stack:'فوق بعض',with_video:'مع الفيديو',split_h:'عرض أفقي',split_v:'عرض رأسي',code_q:'عندك كود تفعيل؟',code_ph:'اكتب الكود',code_btn:'تفعيل',code_ok:'تم التفعيل. تقدر تشوف دروسك الآن.',code_bad:'الكود غير صحيح أو مستخدم من قبل.',code_many:'محاولات كثيرة. حاول بعد ساعة.',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
+ wm:'عليه علامة مائية باسمك ورقمك. ممنوع التسجيل أو المشاركة.',lang:'English',open:'فتح',qz_pass:'ناجح',qz_fail:'لم تنجح بعد',qz_ok:'صحيح',qz_no:'خطأ',qz_yours:'إجابتك',qz_right:'الإجابة الصحيحة',both:'فيديو + PDF',side:'جنب بعض',stack:'فوق بعض',with_video:'مع الفيديو',split_h:'عرض أفقي',split_v:'عرض رأسي',code_q:'عندك كود تفعيل؟',code_ph:'اكتب الكود',code_btn:'تفعيل',code_ok:'تم التفعيل. تقدر تشوف دروسك الآن.',code_bad:'الكود غير صحيح أو مستخدم من قبل.',code_many:'محاولات كثيرة. حاول بعد ساعة.',k_pdf:'PDF',k_exam:'امتحان',k_summary:'ملخص',k_audio:'صوتي',k_image:'صورة',k_other:'ملف',check:'تحقق من بريدك لتأكيد الحساب ثم سجّل الدخول.',none:'غير متاح حالياً.'},
 en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create account',email:'Email',pass:'Password',name:'Full name',phone:'Phone number',
- noacc:'No account? Create one',haveacc:'Have an account? Sign in',out:'Sign out',lessons:'My lessons',buy:'Subscribe',reqs:'My requests',
+ noacc:'No account? Create one',haveacc:'Have an account? Sign in',out:'Sign out',lessons:'My lessons',buy:'Subscribe',reqs:'My requests',learning:'Learning',announcements:'Announcements',meetings:'Live meetings',quizzes:'Quizzes',start:'Start quiz',no_learning:'No updates yet',
  nolessons:'No lessons are enabled for your account yet. Choose from the “Subscribe” tab.',back:'Back',min:'min',qar:'QAR',
  monthly:'Monthly access',course:'Full course',lesson:'Single lesson',pay:'Pay now',alias:'Transfer via Fawran to the name:',copy:'Copy',copied:'Copied',
  amount:'Amount',sender:'Name you transferred from',receipt:'Transfer receipt image',send:'Send receipt',sent:'Your request was sent. Access is enabled after the receipt is reviewed.',
@@ -74,7 +74,7 @@ en:{app:'Madar Eng',tag:'Engineering Courses',signin:'Sign in',signup:'Create ac
  e_generic:'Something went wrong. Try again.',e_file:'Choose an image (JPG or PNG) or a PDF under 5 MB.',e_need:'Please fill in the required fields.',
  device_limit:'Your account reached its device limit. Contact your tutor to reset.',disabled:'Your account is disabled. Contact your tutor.',
  no_access:'This lesson is not enabled for your account.',device_not_allowed:'This device is not registered for your account. Reload the page.',loading:'Loading…',
- wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',both:'Video + PDF',side:'Side by side',stack:'Stacked',with_video:'With video',split_h:'Side by side',split_v:'Stacked',code_q:'Have an activation code?',code_ph:'Enter code',code_btn:'Activate',code_ok:'Activated. You can see your lessons now.',code_bad:'The code is invalid or already used.',code_many:'Too many attempts. Try again in an hour.',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
+ wm:'It carries a watermark with your name and number. Recording or sharing is prohibited.',lang:'عربي',open:'Open',qz_pass:'Passed',qz_fail:'Not yet',qz_ok:'Correct',qz_no:'Wrong',qz_yours:'Your answer',qz_right:'Correct answer',both:'Video + PDF',side:'Side by side',stack:'Stacked',with_video:'With video',split_h:'Side by side',split_v:'Stacked',code_q:'Have an activation code?',code_ph:'Enter code',code_btn:'Activate',code_ok:'Activated. You can see your lessons now.',code_bad:'The code is invalid or already used.',code_many:'Too many attempts. Try again in an hour.',k_pdf:'PDF',k_exam:'Exam',k_summary:'Summary',k_audio:'Audio',k_image:'Image',k_other:'File',check:'Check your email to confirm your account, then sign in.',none:'Not available right now.'}
 };
 let lang='ar';try{lang=localStorage.getItem('lang')||'ar'}catch(e){}
 const t=k=>TX[lang][k]||k;
@@ -82,7 +82,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const pick=(o,b)=>(lang==='ar'&&o[b+'_ar'])?o[b+'_ar']:(o[b+'_en']||o[b+'_ar']||'');
 const money=n=>Number(n).toLocaleString('en')+' '+t('qar');
 const $=s=>document.querySelector(s);
-const S={user:null,tab:'lessons',bind:'ok',courses:[],lessons:[],files:[],offers:[],cfg:{},reqs:[],signup:false,msg:'',err:'',view:null,pay:null,busy:false};
+const S={user:null,tab:'lessons',bind:'ok',courses:[],lessons:[],files:[],offers:[],cfg:{},reqs:[],announcements:[],meetings:[],quizzes:[],signup:false,msg:'',err:'',view:null,pay:null,busy:false};
 
 function deviceId(){let id;try{id=localStorage.getItem('did');if(!id){id='web-'+crypto.randomUUID();localStorage.setItem('did',id)}}catch(e){id='web-'+Math.random().toString(36).slice(2)}return id}
 
@@ -95,14 +95,17 @@ async function boot(){
   render();
 }
 async function loadAll(){
-  const [c,l,o,s,q,fl]=await Promise.all([
-    sb.from('courses').select('id,code,title_en,title_ar,instructor').order('sort_order'),
+  const [c,l,o,s,q,fl,an,mt,qz]=await Promise.all([
+    sb.from('courses').select('id,code,title_en,title_ar,instructor,cover_url').order('sort_order'),
     sb.from('lessons').select('id,course_id,title_en,title_ar,duration_seconds,video_source,youtube_id').order('sort_order'),
     sb.from('offers').select('*').eq('is_active',true).order('sort_order'),
     sb.from('app_settings').select('key,value'),
     sb.from('payment_requests').select('*').order('created_at',{ascending:false}),
-    sb.from('lesson_files').select('id,lesson_id,kind,title_ar,title_en,storage_path').order('sort_order')]);
-  S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.reqs=q.data||[];S.files=fl.data||[];
+    sb.from('lesson_files').select('id,lesson_id,kind,title_ar,title_en,storage_path').order('sort_order'),
+    sb.from('announcements').select('*,course:courses(title_ar,title_en)').eq('is_published',true).order('publish_at',{ascending:false}),
+    sb.from('meetings').select('*,course:courses(title_ar,title_en)').eq('is_published',true).order('starts_at'),
+    sb.from('quizzes').select('*,course:courses(title_ar,title_en),lesson:lessons(title_ar,title_en)').eq('status','published').order('created_at',{ascending:false})]);
+  S.courses=c.data||[];S.lessons=l.data||[];S.offers=o.data||[];S.reqs=q.data||[];S.files=fl.data||[];S.announcements=an.data||[];S.meetings=mt.data||[];S.quizzes=qz.data||[];
   S.cfg={};(s.data||[]).forEach(x=>S.cfg[x.key]=x.value);
 }
 
@@ -123,7 +126,7 @@ function lessonsView(){
   return S.courses.map(c=>{
     const ls=S.lessons.filter(l=>l.course_id===c.id);
     if(!ls.length)return '';
-    return `<div class="card"><b>${esc(pick(c,'title'))}</b><div class="mut">${esc([c.code,c.instructor].filter(Boolean).join(' • '))}</div>
+    return `<div class="card">${c.cover_url?`<img src="${esc(c.cover_url)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:8px">`:''}<b>${esc(pick(c,'title'))}</b><div class="mut">${esc([c.code,c.instructor].filter(Boolean).join(' • '))}</div>
     ${ls.map((l,i)=>`<div class="row" style="margin-top:10px"><span>${i+1}. ${esc(pick(l,'title'))}${l.duration_seconds?` <span class="mut">(${Math.round(l.duration_seconds/60)} ${t('min')})</span>`:''}</span>
     <span style="display:flex;gap:6px">${S.files.some(f=>f.lesson_id===l.id&&/\.pdf$/i.test(f.storage_path))?`<button class="btn ghost sm" data-act="split" data-v="${l.id}">${t('both')}</button>`:''}<button class="btn sm" data-act="play" data-v="${l.id}">▶</button></span></div>
     ${S.files.filter(f=>f.lesson_id===l.id).map(f=>`<div class="row" style="margin-top:4px;padding-inline-start:16px"><span class="mut">${t('k_'+f.kind)}: ${esc(pick(f,'title'))}</span><span style="display:flex;gap:6px"><button class="btn ghost sm" data-act="openfile" data-v="${esc(f.storage_path)}">${t('open')}</button></span></div>`).join('')}`).join('')}</div>`;
@@ -161,6 +164,31 @@ function reqsView(){
   ${r.reject_reason?`<div class="err">${t('reason')}: ${esc(r.reject_reason)}</div>`:''}</div>`).join('');
 }
 
+function learningView(){
+  const a=S.announcements.map(x=>`<div class="card"><div class="big">${esc(x.title)}</div><div class="mut">${new Date(x.created_at).toLocaleDateString(lang==='ar'?'ar-QA':'en-GB')}</div><p>${esc(x.body)}</p></div>`).join('');
+  const m=S.meetings.map(x=>`<div class="card"><div class="row"><div><div class="big">${esc(x.title)}</div><div class="mut">${new Date(x.starts_at).toLocaleString(lang==='ar'?'ar-QA':'en-GB')}</div></div><a class="btn sm" href="${esc(x.meeting_url)}" target="_blank" rel="noopener">${t('open')}</a></div><div class="mut">${esc(x.description||'')}</div></div>`).join('');
+  const q=S.quizzes.map(x=>`<div class="card row"><div><div class="big">${esc(x.title)}</div><div class="mut">${esc(x.course?.title_ar||x.course?.title_en||'')}</div></div><button class="btn sm" data-act="quiz" data-v="${x.id}">${t('start')}</button></div>`).join('');
+  return `<h2>${t('learning')}</h2><h3>${t('announcements')}</h3>${a||`<div class="card mut">${t('no_learning')}</div>`}<h3>${t('meetings')}</h3>${m||`<div class="card mut">${t('no_learning')}</div>`}<h3>${t('quizzes')}</h3>${q||`<div class="card mut">${t('no_learning')}</div>`}`;
+}
+
+function quizResultView(){
+  const v=S.view,r=v.result,L={};(r.results||[]).forEach(x=>L[x.id]=x);
+  return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button>
+  <div class="card center"><div class="mut">${esc(v.title)}</div><div class="price" style="font-size:2.2rem"><bdi>${r.percent}%</bdi></div>
+  <span class="chip ${r.passed?'approved':'rejected'}">${r.passed?t('qz_pass'):t('qz_fail')}</span>
+  <div class="mut" style="margin-top:6px"><span dir="ltr">${r.score} / ${r.total_points}</span></div></div>`+
+  (v.questions||[]).map((q,i)=>{const a=L[q.id]||{};
+    return `<div class="card"><div class="row"><b><span dir="ltr">${i+1}.</span> <bdi>${esc(q.question_text)}</bdi></b><span class="chip ${a.is_correct?'approved':'rejected'}">${a.is_correct?t('qz_ok'):t('qz_no')}</span></div>
+    <div class="mut">${t('qz_yours')}: <bdi>${a.selected==null?'—':esc((q.options||[])[a.selected])}</bdi></div>
+    ${a.is_correct?'':`<div>${t('qz_right')}: <bdi>${esc((q.options||[])[a.correct_option])}</bdi></div>`}
+    ${a.explanation?`<div class="mut" style="margin-top:6px"><bdi>${esc(a.explanation)}</bdi></div>`:''}</div>`}).join('');
+}
+
+function quizView(){
+  const v=S.view, qs=v.questions||[];
+  return `<button class="btn ghost sm" data-act="closeplayer">← ${t('back')}</button><div class="card"><h2>${esc(v.title)}</h2><form id="quizf">${qs.map((q,i)=>`<fieldset style="border:0;padding:0;margin:18px 0"><legend><b><span dir="ltr">${i+1}.</span> <bdi>${esc(q.question_text)}</bdi></b></legend>${(q.options||[]).map((o,j)=>`<label style="display:block;margin:7px 0"><input type="radio" name="q_${q.id}" value="${j}" required style="width:auto;margin-inline-end:7px">${esc(o)}</label>`).join('')}</fieldset>`).join('')}<button class="btn">${t('submit')||'Submit'}</button></form></div>`;
+}
+
 const wmCol=()=>S.cfg.wm_color||'#FF0000';
 const wmAlpha=()=>Math.min(1,Math.max(.1,parseFloat(S.cfg.wm_alpha||'.5')||.5));
 const errCard=(c,det)=>`<div class="card err">${esc(t(c)===c?t('e_generic'):t(c))}${det?`<div class="mut" dir="ltr" style="font-size:.75rem;margin-top:6px;word-break:break-all">${esc(det)}</div>`:''}</div>`;
@@ -178,6 +206,8 @@ function ytHtml(id){
 const vdoHtml=v=>`<div class="vid"><iframe src="https://player.vdocipher.com/v2/?otp=${encodeURIComponent(v.otp)}&playbackInfo=${encodeURIComponent(v.pi)}" allow="encrypted-media; fullscreen" allowfullscreen></iframe></div><p class="mut center">${t('wm')}</p>`;
 function playerView(){
   const v=S.view;let inner;
+  if(v.result)return quizResultView();
+  if(v.quiz)return quizView();
   if(v.split){
     const files=S.files.filter(f=>f.lesson_id===v.lid&&/\.pdf$/i.test(f.storage_path));
     const sel=files.length>1?`<select id="spf" style="margin:0;width:auto;max-width:55%">${files.map(f=>`<option value="${esc(f.storage_path)}" ${f.storage_path===v.fpath?'selected':''}>${esc(pick(f,'title'))}</option>`).join('')}</select>`:'';
@@ -235,8 +265,8 @@ function render(){
   else if(S.bind!=='ok')body=`<div class="card err">${esc(t(S.bind)===S.bind?t('e_generic'):t(S.bind))}</div>`;
   else if(S.view)body=playerView();
   else{
-    const tabs=[['lessons','lessons'],['buy','buy'],['reqs','reqs']].map(([k,l])=>`<button class="${S.tab===k?'on':''}" data-act="tab" data-v="${k}">${t(l)}</button>`).join('');
-    body=`<div class="tabs">${tabs}</div>`+(S.tab==='lessons'?lessonsView():S.tab==='buy'?buyView():reqsView())
+    const tabs=[['lessons','lessons'],['learning','learning'],['buy','buy'],['reqs','reqs']].map(([k,l])=>`<button class="${S.tab===k?'on':''}" data-act="tab" data-v="${k}">${t(l)}</button>`).join('');
+    body=`<div class="tabs">${tabs}</div>`+(S.tab==='lessons'?lessonsView():S.tab==='learning'?learningView():S.tab==='buy'?buyView():reqsView())
      +`<footer><button class="btn danger sm" data-act="delete">${t('del')}</button></footer>`;
   }
   $('#app').innerHTML=head+body;
@@ -311,6 +341,12 @@ const A={
     S.view={pdf:true};render();
     try{const r=await fetch(data.signedUrl);S.view.pdfData=await r.arrayBuffer();drawPdf()}catch(e){S.view={error:'e_generic'};render()}
   },
+  async quiz(id){
+    const q=S.quizzes.find(x=>x.id===id);if(!q)return;
+    const r=await sb.rpc('get_quiz',{p_quiz_id:id});
+    if(r.error||!r.data||!(r.data.questions||[]).length){alert(t('e_generic'));return}
+    S.view={quiz:id,title:q.title,questions:r.data.questions};render();window.scrollTo(0,0);
+  },
 
   pay(id){S.pay=S.offers.find(o=>o.id===id);S.err='';S.msg='';render()},
   payback(){S.pay=null;S.err='';S.msg='';render()},
@@ -342,6 +378,12 @@ document.addEventListener('pointerdown',e=>{if(e.target.id==='yts')ytDrag=true})
 document.addEventListener('contextmenu',e=>{if(e.target.closest('.ytshield,.pdfbox'))e.preventDefault()});
 document.addEventListener('change',e=>{if(e.target.id==='spf')A.splitfile(e.target.value);if(e.target.id==='yts'){ytDrag=false;if(ytP&&ytP.getDuration)ytP.seekTo(ytP.getDuration()*e.target.value/1000,true)}});
 document.addEventListener('submit',async e=>{
+  if(e.target.id==='quizf'){
+    e.preventDefault();const answers={};new FormData(e.target).forEach((v,k)=>{if(k.startsWith('q_'))answers[k.slice(2)]=Number(v)});
+    const r=await sb.rpc('submit_quiz',{p_quiz_id:S.view.quiz,p_answers:answers});
+    if(r.error){alert(t('e_generic'));return}
+    S.view={result:r.data,title:S.view.title,questions:S.view.questions};render();window.scrollTo(0,0);return;
+  }
   if(e.target.id!=='af')return;e.preventDefault();
   const email=$('#a_e').value.trim(),pw=$('#a_w').value;
   const nm=S.signup?$('#a_n').value.trim():'',ph=S.signup?$('#a_p').value.trim():'';
